@@ -1,0 +1,5 @@
+float32[] magOffset
+float32[] magAdjust
+float32[] magScaling
+---
+bool accepted

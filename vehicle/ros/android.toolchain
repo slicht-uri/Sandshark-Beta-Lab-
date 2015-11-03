@@ -1,0 +1,26 @@
+# the name of the target operating system
+SET(CMAKE_SYSTEM_NAME android)
+
+# which compilers to use for C and C++
+SET(CMAKE_C_COMPILER /usr/local/bluefin/adapt-sysroot/bin/arm-linux-androideabi-gcc)
+SET(CMAKE_CXX_COMPILER /usr/local/bluefin/adapt-sysroot/bin/arm-linux-androideabi-g++)
+
+SET(CMAKE_C_FLAGS "-g -DTIXML_USE_STL --sysroot=/usr/local/bluefin/adapt-sysroot/" CACHE STRING "" FORCE )
+SET(CMAKE_CXX_FLAGS "-g -DTIXML_USE_STL -frtti -fexceptions --sysroot=/usr/local/bluefin/adapt-sysroot/" CACHE STRING "" FORCE )
+
+set(CMAKE_REQUIRED_INCLUDES 
+  /usr/local/bluefin/adapt-sysroot/usr 
+  /usr/local/bluefin/adapt-sysroot/include)
+  
+# here is the target environment located
+SET(CMAKE_FIND_ROOT_PATH /usr/local/bluefin/adapt-sysroot/)
+
+SET(CMAKE_VERBOSE_MAKEFILE ON)
+# adjust the default behaviour of the FIND_XXX() commands:
+# search headers and libraries in the target environment, search 
+# programs in the host environment
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
+#target_link_libraries(gnustl_shared) 

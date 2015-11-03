@@ -1,0 +1,4 @@
+float32[] accelOffset
+float32[] accelScaling
+---
+bool accepted

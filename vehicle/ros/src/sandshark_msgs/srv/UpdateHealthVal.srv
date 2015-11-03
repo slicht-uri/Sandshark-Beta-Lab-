@@ -1,0 +1,6 @@
+string NAME="Adapt Health Update Value"
+
+int8 updateValueID
+float64 value
+---
+bool accepted

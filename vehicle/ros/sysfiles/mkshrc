@@ -1,0 +1,39 @@
+# Copyright (c) 2010
+#	Thorsten Glaser <t.glaser@tarent.de>
+# This file is provided under the same terms as mksh.
+#-
+# Minimal /system/etc/mkshrc for Android
+
+: ${TERM:=vt100} ${HOME:=/data} ${MKSH:=/system/bin/sh} ${HOSTNAME:=android}
+: ${SHELL:=$MKSH} ${USER:=$(typeset x=$(id); x=${x#*\(}; print -r -- ${x%%\)*})}
+if (( USER_ID )); then PS1='$'; else PS1='#'; fi
+function precmd {
+	typeset e=$?
+
+	(( e )) && print -n "$e|"
+}
+PS1='$(precmd)$USER@$HOSTNAME:${PWD:-?} '"$PS1 "
+export HOME HOSTNAME MKSH PS1 SHELL TERM USER
+alias l='ls'
+alias la='l -a'
+alias ll='l -l'
+alias lo='l -a -l'
+
+for p in ~/.bin; do
+	[[ -d $p/. ]] || continue
+	[[ :$PATH: = *:$p:* ]] || PATH=$p:$PATH
+done
+
+unset p
+
+export PATH=/data/app/:/data/app/bluefin/python/bin/:/data/app/bluefin/install_isolated/bin/:$PATH
+export LD_LIBRARY_PATH=/data/app/:/data/app/bluefin/python/lib/:/data/app/bluefin/install_isolated/lib/:$LD_LIBRARY_PATH
+export PYTHONPATH=/data/app/bluefin/install_isolated/lib/python2.7/dist-packages/
+export ROS_PACKAGE_PATH=/data/app/bluefin/install_isolated/lib:/data/app/bluefin/install_isolated/share
+export ROS_MASTER_URI=http://127.0.0.1:11311
+export ROS_HOME=/data/app/
+export ROS_IP=127.0.0.1
+
+source /data/app/bluefin/opt/ros_xc/share/sandshark_common/misc/runtimeEnv.bash
+
+: place customisations above this line

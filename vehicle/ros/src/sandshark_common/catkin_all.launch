@@ -1,0 +1,76 @@
+<launch>
+    <node name="motion" pkg="sandshark_drivers" type="sandshark_motion_node" respawn="false">
+        <param name="startDelay" value="60.0"/>
+        <rosparam command="load" file="/data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/motion.yaml" />
+    </node>
+    
+    <node name="gps" pkg="sandshark_drivers" type="sandshark_gps_node" respawn="false">
+        <param name="logLocal" value="false"/>
+    </node>
+
+    <node name="mavlink" pkg="sandshark_drivers" type="sandshark_mavlink_node" respawn="false">
+        <param name="sendIPAddress" value="192.168.1.233"/>
+        <param name="secondarySendIPAddress" value="10.0.7.66"/>
+    </node>
+    
+        <node name="altitude" pkg="sandshark_drivers" type="sandshark_altimeter_node" respawn="false">
+    </node>
+
+    <node name="currentsense" pkg="sandshark_drivers" type="sandshark_currentsense_node" respawn="false">
+    </node>
+
+    <node name="depth" pkg="sandshark_drivers" type="sandshark_depth_node" respawn="false">
+    </node>
+
+    <node name="environmental" pkg="sandshark_drivers" type="sandshark_environmental_node" respawn="false">
+    </node>
+
+    <node name="gasgauge" pkg="sandshark_drivers" type="sandshark_gasgauge_node" respawn="false">
+    </node>
+
+    <node name="ledcontrol" pkg="sandshark_drivers" type="sandshark_led_node" respawn="false">
+    </node>
+
+    <node name="tailcone" pkg="sandshark_drivers" type="sandshark_tailcone_node" respawn="false">
+    </node>
+
+    <node name="navigation" pkg="sandshark_apps" type="sandshark_navigation_node" respawn="false">
+        <param name="deadrecktest" value="0" />
+        <param name="logLocal" value="false"/>
+        <param name="sendUDP" value="false"/>
+        <param name="sendIPAddress" value="192.168.6.15"/>
+    </node>
+
+    <node name="health" pkg="sandshark_apps" type="sandshark_health_node" respawn="false">
+    </node>
+
+    <node name="actionselector" pkg="sandshark_apps" type="sandshark_actionselector_node" respawn="false">
+        <param name="initialRPM" value="1000" />
+        <param name="gpsSurfacing" value="true" />
+    </node>
+    
+    <node name="dynamiccontrol" pkg="sandshark_apps" type="sandshark_dynamiccontrol_node" respawn="false">
+        <param name="headingwrapAngles" value="true" />
+        <param name="pitchwrapAngles" value="true" />
+        <param name="correctTailconePerRoll" value="true" /> 
+        <rosparam>
+          rpm_to_speed_map: {
+          "-2500":"-4.0",
+          "0"   : "0.0",
+          "300" : "1.3",
+          "600" : "2.4",
+          "900" : "3.3",
+          "1200": "4.0",
+          "1500": "4.5",
+          "2000": "5.0",
+          "2500": "5.4"}
+        </rosparam>
+        <rosparam command="load" file="/data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/dynamiccontrol.yaml" />
+    </node>
+
+    <node name="objectivecontrol" pkg="sandshark_apps" type="sandshark_objectivecontrol_node" respawn="false">
+    </node>
+
+    <node name="pathplanning" pkg="sandshark_apps" type="sandshark_pathplanning_node" respawn="false">
+    </node>
+</launch>

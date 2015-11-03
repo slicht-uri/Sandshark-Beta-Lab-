@@ -1,0 +1,6 @@
+string NAME="Adapt DC Update Gain"
+
+int8 updateGainID
+float64 value
+---
+bool accepted

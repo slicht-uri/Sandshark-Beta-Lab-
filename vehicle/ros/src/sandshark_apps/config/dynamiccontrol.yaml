@@ -1,0 +1,5 @@
+{correctTailconePerRoll: true, depthclipCmd: true, depthcmdMax: 0.5236,
+depthcmdMin: -0.5236, depthdgain: 0.0, depthigain: 0.001, depthimax: 0.1,
+depthpgain: 0.35, headingdgain: 0.0, headingigain: 0.01, headingimax: 0.2,
+headingpgain: 0.5, headingwrapAngles: true, pitchigain: 0.0, pitchimax: 0.5, pitchpgain: 0.35,
+pitchwrapAngles: true, rpm_to_speed: 0.0008}

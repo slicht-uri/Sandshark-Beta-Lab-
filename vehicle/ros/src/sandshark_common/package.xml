@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <name>sandshark_common</name>
+  <version>1.0.0</version>
+  <description>Common library for Bluefin Robotics SandShark</description>
+
+  <maintainer email="sandshark-maintainer@bluefinrobotics.com">Sandshark Maintainer</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://www.bluefinrobotics.com/sandshark/</url>
+  <!-- Also add 'bugtracker' and 'repository' urls. -->
+
+  <author>Scott Biddlestone</author>
+  <author>Brenden Gibbons</author>
+  <author>Chris Murphy</author>
+  <author>Jeff Adams</author>
+  <author>Brad Powers</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>sandshark_msgs</build_depend>
+  <build_depend>geodesy</build_depend>
+  <run_depend>sandshark_msgs</run_depend>
+  <run_depend>geodesy</run_depend>
+</package>

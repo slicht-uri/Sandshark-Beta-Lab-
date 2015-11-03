@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.bluefinrobotics.bluefingps"
+      android:versionCode="1"
+      android:versionName="1.0">
+
+    <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="16" />
+          
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>    
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CONTROL_LOCATION_UPDATES" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" /> 
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" /> 
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" /> 
+    <uses-permission android:name="android.permission.SET_TIME" />
+                                                                                                      
+    <application android:allowBackup="true" android:label="@string/app_name" android:icon="@drawable/ic_launcher">
+        <receiver 
+            android:enabled="true"
+            android:exported="true"
+            android:name="com.bluefinrobotics.bluefingps.BluefinAdaptGpsServiceReceiver"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE" />
+            </intent-filter>            
+            <intent-filter>
+                <action android:name="com.bluefinrobotics.bluefingps.ADAPT_START_GPS"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.bluefinrobotics.bluefingps.ADAPT_STOP_GPS"/>
+            </intent-filter> 
+        </receiver>        
+        <service
+            android:enabled="true"
+            android:name="com.bluefinrobotics.bluefingps.BluefinAdaptGpsService"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.bluefinrobotics.bluefingps.BluefinAdaptGpsService" />
+            </intent-filter>
+        </service>
+        
+    </application>
+</manifest>
