@@ -1,5 +1,8 @@
 /*
- * actuallyusefulrecorder.cpp
+ * startstoprecorder.cpp'
+ *
+ * StartStopRecorder is an implementation of Willow Garage's Recorder, which enables
+ * the starting and stopping of logging.
  *
  *  Created on: Nov 2, 2015
  *      Author: brenden
@@ -39,7 +42,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 
-#include "actuallyusefulrecorder.h"
+#include "startstoprecorder.h"
 
 #include <sys/stat.h>
 #include <boost/filesystem.hpp>
@@ -61,6 +64,7 @@
 #include <boost/thread.hpp>
 #include <boost/thread/xtime.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <ros/ros.h>
 #include <topic_tools/shape_shifter.h>
@@ -82,22 +86,15 @@ using ros::Time;
 namespace rosbag {
 
 // OutgoingMessage
-
 OutgoingMessage::OutgoingMessage(string const& _topic, topic_tools::ShapeShifter::ConstPtr _msg, boost::shared_ptr<ros::M_string> _connection_header, Time _time) :
-    topic(_topic), msg(_msg), connection_header(_connection_header), time(_time)
-{
-}
+    topic(_topic), msg(_msg), connection_header(_connection_header), time(_time){}
 
 // OutgoingQueue
-
 OutgoingQueue::OutgoingQueue(string const& _filename, std::queue<OutgoingMessage>* _queue, Time _time) :
-    filename(_filename), queue(_queue), time(_time)
-{
-}
+    filename(_filename), queue(_queue), time(_time){}
 
-// ActuallyUsefulRecorderOptions
-
-ActuallyUsefulRecorderOptions::ActuallyUsefulRecorderOptions() :
+// StartStopRecorderOptions
+StartStopRecorderOptions::StartStopRecorderOptions() :
     trigger(false),
     record_all(false),
     regex(false),
@@ -116,13 +113,10 @@ ActuallyUsefulRecorderOptions::ActuallyUsefulRecorderOptions() :
     split(false),
     max_size(0),
     max_duration(-1.0),
-    node("")
-{
-}
+    node(""){}
 
-// ActuallyUsefulRecorder
-
-ActuallyUsefulRecorder::ActuallyUsefulRecorder(ActuallyUsefulRecorderOptions const& options) :
+// StartStopRecorder
+StartStopRecorder::StartStopRecorder(StartStopRecorderOptions const& options) :
     options_(options),
     num_subscribers_(0),
     exit_code_(0),
@@ -130,11 +124,34 @@ ActuallyUsefulRecorder::ActuallyUsefulRecorder(ActuallyUsefulRecorderOptions con
     split_count_(0),
     writing_enabled_(true),
     _stopRunning(false),
-    _startRunning(false)
-{
+    _startRunning(false){}
+
+StartStopRecorder::StartStopRecorder() :
+    options_(),
+    num_subscribers_(0),
+    exit_code_(0),
+    queue_size_(0),
+    split_count_(0),
+    writing_enabled_(true),
+    _stopRunning(false),
+    _startRunning(false){}
+
+void StartStopRecorder::setOptions(StartStopRecorderOptions const& options){
+  options_ = options;
 }
 
-int ActuallyUsefulRecorder::run() {
+void StartStopRecorder::stopRecording() {
+  _stopRunning = true;
+  _recordThreadPtr->interrupt();
+  //close up the log properly
+  stopWriting();
+}
+
+void StartStopRecorder::startRecording() {
+  _startRunning = true;
+}
+
+int StartStopRecorder::run() {
   while(_startRunning == false) {
     usleep(1000);
   }
@@ -186,39 +203,43 @@ int ActuallyUsefulRecorder::run() {
 
     // Spin up a thread for writing to the file
     boost::thread record_thread;
+
+    // so that we can interrupt the thread outside of this function
+    _recordThreadPtr = &record_thread;
+
     if (options_.snapshot)
     {
-        record_thread = boost::thread(boost::bind(&ActuallyUsefulRecorder::doRecordSnapshotter, this));
+        record_thread = boost::thread(boost::bind(&StartStopRecorder::doRecordSnapshotter, this));
 
         // Subscribe to the snapshot trigger
-        trigger_sub = nh.subscribe<std_msgs::Empty>("snapshot_trigger", 100, boost::bind(&ActuallyUsefulRecorder::snapshotTrigger, this, _1));
+        trigger_sub = nh.subscribe<std_msgs::Empty>("snapshot_trigger", 100, boost::bind(&StartStopRecorder::snapshotTrigger, this, _1));
     }
-    else
-        record_thread = boost::thread(boost::bind(&ActuallyUsefulRecorder::doRecord, this));
-
-
+    else {
+        record_thread = boost::thread(boost::bind(&StartStopRecorder::doRecord, this));
+    }
 
     ros::Timer check_master_timer;
     if (options_.record_all || options_.regex || (options_.node != std::string("")))
     {
         // check for master first
         doCheckMaster(ros::TimerEvent(), nh);
-        check_master_timer = nh.createTimer(ros::Duration(1.0), boost::bind(&ActuallyUsefulRecorder::doCheckMaster, this, _1, boost::ref(nh)));
+        check_master_timer = nh.createTimer(ros::Duration(1.0), boost::bind(&StartStopRecorder::doCheckMaster, this, _1, boost::ref(nh)));
     }
 
-    ros::MultiThreadedSpinner s(10);
-    ros::spin(s);
-
+    //spin until we stahp.  If we never return here, we can only run once
+    while(_stopRunning == false) {
+      ros::spinOnce();
+    }
     queue_condition_.notify_all();
 
-    record_thread.join();
+    //pause a bit so that by the time we delete queue_, doQueue is done with it
+    usleep(10000);
 
     delete queue_;
-
     return exit_code_;
 }
 
-shared_ptr<ros::Subscriber> ActuallyUsefulRecorder::subscribe(string const& topic) {
+shared_ptr<ros::Subscriber> StartStopRecorder::subscribe(string const& topic) {
   ROS_INFO("Subscribing to %s", topic.c_str());
 
     ros::NodeHandle nh;
@@ -232,7 +253,7 @@ shared_ptr<ros::Subscriber> ActuallyUsefulRecorder::subscribe(string const& topi
     ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();
     ops.helper = ros::SubscriptionCallbackHelperPtr(
         new ros::SubscriptionCallbackHelperT<const ros::MessageEvent<topic_tools::ShapeShifter const>& >(
-            boost::bind(&ActuallyUsefulRecorder::doQueue, this, _1, topic, sub, count)
+            boost::bind(&StartStopRecorder::doQueue, this, _1, topic, sub, count)
         )
     );
     *sub = nh.subscribe(ops);
@@ -243,11 +264,11 @@ shared_ptr<ros::Subscriber> ActuallyUsefulRecorder::subscribe(string const& topi
     return sub;
 }
 
-bool ActuallyUsefulRecorder::isSubscribed(string const& topic) const {
+bool StartStopRecorder::isSubscribed(string const& topic) const {
     return currently_recording_.find(topic) != currently_recording_.end();
 }
 
-bool ActuallyUsefulRecorder::shouldSubscribeToTopic(std::string const& topic, bool from_node) {
+bool StartStopRecorder::shouldSubscribeToTopic(std::string const& topic, bool from_node) {
     // ignore already known topics
     if (isSubscribed(topic)) {
         return false;
@@ -281,7 +302,7 @@ bool ActuallyUsefulRecorder::shouldSubscribeToTopic(std::string const& topic, bo
 }
 
 template<class T>
-std::string ActuallyUsefulRecorder::timeToStr(T ros_t)
+std::string StartStopRecorder::timeToStr(T ros_t)
 {
     std::stringstream msg;
     const boost::posix_time::ptime now=
@@ -294,8 +315,11 @@ std::string ActuallyUsefulRecorder::timeToStr(T ros_t)
 }
 
 //! Callback to be invoked to save messages into a queue
-void ActuallyUsefulRecorder::doQueue(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event, string const& topic, shared_ptr<ros::Subscriber> subscriber, shared_ptr<int> count) {
-    //void ActuallyUsefulRecorder::doQueue(topic_tools::ShapeShifter::ConstPtr msg, string const& topic, shared_ptr<ros::Subscriber> subscriber, shared_ptr<int> count) {
+void StartStopRecorder::doQueue(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event, string const& topic, shared_ptr<ros::Subscriber> subscriber, shared_ptr<int> count) {
+  if(_stopRunning) {
+    return;
+  }
+
     Time rectime = Time::now();
 
     if (options_.verbose)
@@ -303,18 +327,19 @@ void ActuallyUsefulRecorder::doQueue(const ros::MessageEvent<topic_tools::ShapeS
 
     OutgoingMessage out(topic, msg_event.getMessage(), msg_event.getConnectionHeaderPtr(), rectime);
 
+
     {
         boost::mutex::scoped_lock lock(queue_mutex_);
-
+        if(_stopRunning) {
+          return;
+        }
         queue_->push(out);
         queue_size_ += out.msg->size();
-
         // Check to see if buffer has been exceeded
         while (options_.buffer_size > 0 && queue_size_ > options_.buffer_size) {
             OutgoingMessage drop = queue_->front();
             queue_->pop();
             queue_size_ -= drop.msg->size();
-
             if (!options_.snapshot) {
                 Time now = Time::now();
                 if (now > last_buffer_warn_ + ros::Duration(5.0)) {
@@ -333,16 +358,14 @@ void ActuallyUsefulRecorder::doQueue(const ros::MessageEvent<topic_tools::ShapeS
         (*count)--;
         if ((*count) == 0) {
             subscriber->shutdown();
-
             num_subscribers_--;
-
             if (num_subscribers_ == 0)
                 ros::shutdown();
         }
     }
 }
 
-void ActuallyUsefulRecorder::updateFilenames() {
+void StartStopRecorder::updateFilenames() {
     vector<string> parts;
 
     std::string prefix = options_.prefix;
@@ -369,7 +392,10 @@ void ActuallyUsefulRecorder::updateFilenames() {
 }
 
 //! Callback to be invoked to actually do the recording
-void ActuallyUsefulRecorder::snapshotTrigger(std_msgs::Empty::ConstPtr trigger) {
+void StartStopRecorder::snapshotTrigger(std_msgs::Empty::ConstPtr trigger) {
+  if(_stopRunning) {
+    return;
+  }
     updateFilenames();
 
     ROS_INFO("Triggered snapshot recording with name %s.", target_filename_.c_str());
@@ -384,7 +410,10 @@ void ActuallyUsefulRecorder::snapshotTrigger(std_msgs::Empty::ConstPtr trigger) 
     queue_condition_.notify_all();
 }
 
-void ActuallyUsefulRecorder::startWriting() {
+void StartStopRecorder::startWriting() {
+  if(_stopRunning) {
+    return;
+  }
     bag_.setCompression(options_.compression);
     bag_.setChunkThreshold(options_.chunk_size);
 
@@ -400,13 +429,14 @@ void ActuallyUsefulRecorder::startWriting() {
     ROS_INFO("Recording to %s.", target_filename_.c_str());
 }
 
-void ActuallyUsefulRecorder::stopWriting() {
+void StartStopRecorder::stopWriting() {
+
     ROS_INFO("Closing %s.", target_filename_.c_str());
     bag_.close();
     rename(write_filename_.c_str(), target_filename_.c_str());
 }
 
-bool ActuallyUsefulRecorder::checkSize()
+bool StartStopRecorder::checkSize()
 {
     if (options_.max_size > 0)
     {
@@ -426,7 +456,7 @@ bool ActuallyUsefulRecorder::checkSize()
     return false;
 }
 
-bool ActuallyUsefulRecorder::checkDuration(const ros::Time& t)
+bool StartStopRecorder::checkDuration(const ros::Time& t)
 {
     if (options_.max_duration > ros::Duration(0))
     {
@@ -452,7 +482,8 @@ bool ActuallyUsefulRecorder::checkDuration(const ros::Time& t)
 
 
 //! Thread that actually does writing to file.
-void ActuallyUsefulRecorder::doRecord() {
+void StartStopRecorder::doRecord() {
+
     // Open bag file for writing
     startWriting();
 
@@ -467,7 +498,6 @@ void ActuallyUsefulRecorder::doRecord() {
     ros::NodeHandle nh;
     while (nh.ok() || !queue_->empty()) {
         boost::unique_lock<boost::mutex> lock(queue_mutex_);
-
         bool finished = false;
         while (queue_->empty()) {
             if (!nh.ok()) {
@@ -504,19 +534,19 @@ void ActuallyUsefulRecorder::doRecord() {
         if (checkDuration(out.time))
             break;
 
+        boost::this_thread::sleep(boost::posix_time::microseconds(10));
+
+        if(_stopRunning) {
+          break;
+        }
+
         if (scheduledCheckDisk() && checkLogging())
             bag_.write(out.topic, out.time, *out.msg, out.connection_header);
 
-        if(_stopRunning) {
-          _stopRunning = false;
-          break;
-        }
     }
-
-    stopWriting();
 }
 
-void ActuallyUsefulRecorder::doRecordSnapshotter() {
+void StartStopRecorder::doRecordSnapshotter() {
     ros::NodeHandle nh;
 
     while (nh.ok() || !queue_queue_.empty()) {
@@ -554,7 +584,7 @@ void ActuallyUsefulRecorder::doRecordSnapshotter() {
     }
 }
 
-void ActuallyUsefulRecorder::doCheckMaster(ros::TimerEvent const& e, ros::NodeHandle& node_handle) {
+void StartStopRecorder::doCheckMaster(ros::TimerEvent const& e, ros::NodeHandle& node_handle) {
     ros::master::V_TopicInfo topics;
     if (ros::master::getTopics(topics)) {
     foreach(ros::master::TopicInfo const& t, topics) {
@@ -603,7 +633,7 @@ void ActuallyUsefulRecorder::doCheckMaster(ros::TimerEvent const& e, ros::NodeHa
     }
 }
 
-void ActuallyUsefulRecorder::doTrigger() {
+void StartStopRecorder::doTrigger() {
     ros::NodeHandle nh;
     ros::Publisher pub = nh.advertise<std_msgs::Empty>("snapshot_trigger", 1, true);
     pub.publish(std_msgs::Empty());
@@ -612,7 +642,7 @@ void ActuallyUsefulRecorder::doTrigger() {
     ros::spin();
 }
 
-bool ActuallyUsefulRecorder::scheduledCheckDisk() {
+bool StartStopRecorder::scheduledCheckDisk() {
     boost::mutex::scoped_lock lock(check_disk_mutex_);
 
     if (ros::WallTime::now() < check_disk_next_)
@@ -622,7 +652,7 @@ bool ActuallyUsefulRecorder::scheduledCheckDisk() {
     return checkDisk();
 }
 
-bool ActuallyUsefulRecorder::checkDisk() {
+bool StartStopRecorder::checkDisk() {
 #if BOOST_FILESYSTEM_VERSION < 3
     struct statvfs fiData;
     if ((statvfs(bag_.getFileName().c_str(), &fiData)) < 0)
@@ -679,7 +709,7 @@ bool ActuallyUsefulRecorder::checkDisk() {
     return true;
 }
 
-bool ActuallyUsefulRecorder::checkLogging() {
+bool StartStopRecorder::checkLogging() {
     if (writing_enabled_)
         return true;
 

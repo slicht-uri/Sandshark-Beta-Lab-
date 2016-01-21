@@ -8,6 +8,8 @@
 #include <sandshark_common/main.h>
 #include <sandshark_common/task_base.h>
 #include <sandshark_msgs/ObjectiveControlStatus.h>
+#include <sandshark_msgs/StartMissionLog.h>
+#include <sandshark_msgs/StopMissionLog.h>
 #include <sandshark_msgs/Navigation.h>
 #include <ros/ros.h>
 #include <ros/time.h>
@@ -15,18 +17,11 @@
 #include <rosbag/bag.h>
 #include <rosbag/stream.h>
 #include <rosbag/macros.h>
-//#include <rosbag/recorder.h>
-#include "actuallyusefulrecorder.h"
+#include "startstoprecorder.h"
 
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/xtime.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
-
 #include <pthread.h>
 #include <signal.h>
 
@@ -37,6 +32,8 @@ namespace sandshark {
 class SharkLoggerApp: public TaskBase {
   private:
     ros::Subscriber _objectiveStatusSub;
+    ros::Subscriber _startMissionLogSub;
+    ros::Subscriber _stopMissionLogSub;
 
     std::string _logDirectory;
     ros::Duration _missionTimeout;
@@ -46,22 +43,14 @@ class SharkLoggerApp: public TaskBase {
     bool _missionIsLogging;
     bool _persistentIsLogging;
 
-    /*rosbag::Recorder *_missionRecorder;
-    rosbag::Recorder *_persistentRecorder;
-    rosbag::Recorder *_r;
+    rosbag::StartStopRecorder _missionRecorder;
+    rosbag::StartStopRecorder _persistentRecorder;
 
-    rosbag::RecorderOptions _mrOptions;
-    rosbag::RecorderOptions _prOptions;*/
+    rosbag::StartStopRecorderOptions _mrOptions;
+    rosbag::StartStopRecorderOptions _prOptions;
 
-    rosbag::ActuallyUsefulRecorder *_missionRecorder;
-    rosbag::ActuallyUsefulRecorder *_persistentRecorder;
-    rosbag::ActuallyUsefulRecorder *_r;
-
-    rosbag::ActuallyUsefulRecorderOptions _mrOptions;
-    rosbag::ActuallyUsefulRecorderOptions _prOptions;
-
-    boost::thread *_missionThread;
-    boost::thread *_persistentThread;
+    boost::shared_ptr<boost::thread> _missionThread;
+    boost::shared_ptr<boost::thread> _persistentThread;
 
     void startMissionLogging();
     void stopMissionLogging();
@@ -82,25 +71,37 @@ class SharkLoggerApp: public TaskBase {
     bool doInitialize();
     bool doRun();
   public:
-    SharkLoggerApp() :
-        TaskBase("SharkLogger", "sharklogger") {
-    }
+    SharkLoggerApp() : TaskBase("SharkLogger", "sharklogger") {}
     void handleSleep();
     void msgObjectiveStatusCallback(const sandshark_msgs::ObjectiveControlStatus::ConstPtr & msg);
+    void logMissionStartCallback(const sandshark_msgs::StartMissionLog::ConstPtr & msg);
+    void logMissionStopCallback(const sandshark_msgs::StopMissionLog::ConstPtr & msg);
 };
 
 void SharkLoggerApp::msgObjectiveStatusCallback(const sandshark_msgs::ObjectiveControlStatus::ConstPtr & msg) {
+  //ROS_ERROR("IN CALLBACK  Mission Running: %s",_inMission? "true":"false");
+  /*
   //update the last time
   _lastOCMTime = ros::Time::now();
   _inMission = msg->mission_running;
   ROS_ERROR("IN CALLBACK  Mission Running: %s",_inMission? "true":"false");
+  */
+}
+
+void SharkLoggerApp::logMissionStartCallback(const sandshark_msgs::StartMissionLog::ConstPtr & msg) {
+  startMissionLogging();
+}
+
+void SharkLoggerApp::logMissionStopCallback(const sandshark_msgs::StopMissionLog::ConstPtr & msg) {
+  stopMissionLogging();
 }
 
 void SharkLoggerApp::startupInitCallback() {
-  ROS_ERROR("SL: SINIT");
-  _objectiveStatusSub = _publicNode->subscribe("/objectivecontrol/objective_status", 1,
-      &SharkLoggerApp::msgObjectiveStatusCallback, this);
-  _privateNode->param("logDirectory", _logDirectory, std::string("/home/brenden/Desktop/fahts"));//std::string("/mnt/sdcard/"));
+  _objectiveStatusSub = _publicNode->subscribe("/objectivecontrol/objective_status", 1, &SharkLoggerApp::msgObjectiveStatusCallback, this);
+  _startMissionLogSub = _publicNode->subscribe("/sharklogger/start_mission_log", 1, &SharkLoggerApp::logMissionStartCallback, this);
+  _stopMissionLogSub = _publicNode->subscribe("/sharklogger/stop_mission_log", 1, &SharkLoggerApp::logMissionStopCallback, this);
+
+  _privateNode->param("logDirectory", _logDirectory, std::string("/mnt/sdcard/"));
 
   _prOptions.record_all = true;
   _prOptions.prefix = _logDirectory + "p";
@@ -119,17 +120,14 @@ void SharkLoggerApp::startupInitCallback() {
   _persistentIsLogging = false;
 
   _rate = new ros::Rate(10);
-  ROS_ERROR("SL: SINIT END");
 }
 
 void SharkLoggerApp::cleanup() {
-  ROS_ERROR("SL: CLEANUP");
   stopPersistentLogging();
   stopMissionLogging();
 }
 
 bool SharkLoggerApp::doInitialize() {
-  ROS_ERROR("SL: DOINIT");
   cleanup();
   //start ten seconds ago
   _lastOCMTime = ros::Time::now();// - _missionTimeout;
@@ -139,13 +137,17 @@ bool SharkLoggerApp::doInitialize() {
   _missionIsLogging = false;
   _persistentIsLogging = false;
 
+  _missionRecorder.setOptions(_mrOptions);
+  _persistentRecorder.setOptions(_prOptions);
+
+  //kick off the persistent logger, which will run until the node stops
   startPersistentLogging();
-  ROS_ERROR("SL: END DOINIT");
   return true;
 }
 
 bool SharkLoggerApp::doRun() {
-  ROS_ERROR("SL: Running, brah");
+
+  /*
   //have we transitioned to running a mission?
   ROS_ERROR("inMission: %s       lastInMission %s !!\n", _inMission? "true":"false", _lastInMission? "true":"false");
   if (!_lastInMission && _inMission) {
@@ -161,6 +163,7 @@ bool SharkLoggerApp::doRun() {
   }
 
   _lastInMission = _inMission;
+  */
   return true;
 }
 
@@ -168,21 +171,21 @@ void SharkLoggerApp::handleSleep() {
   _rate->sleep();
 }
 
+//The actual thread that kicked off in startMissionLogging
 void SharkLoggerApp::missionLoggingThread() {
-  _missionRecorder->run();
+  _missionRecorder.run();
 }
 
+//The actual thread that kicked off in startPersistentLogging
 void SharkLoggerApp::persistentLoggingThread() {
-  _persistentRecorder->run();
+  _persistentRecorder.run();
 }
 
 void SharkLoggerApp::startMissionLogging() {
-  ROS_ERROR("-----------------SL: stahtml----------------");
   if (!_missionIsLogging) {
-    _missionRecorder = new rosbag::ActuallyUsefulRecorder(_mrOptions);
-    _missionThread = new boost::thread(boost::bind(&SharkLoggerApp::missionLoggingThread, this));
-    //_missionThread->detach();
-    _missionRecorder->_startRunning = true;
+    boost::thread f(boost::bind(&SharkLoggerApp::missionLoggingThread, this));
+    _missionRecorder._stopRunning = false;
+    _missionRecorder._startRunning = true;
     _missionIsLogging = true;
   } else {
     ROS_ERROR("One mission logger is already active.  Cannot start a second");
@@ -190,12 +193,10 @@ void SharkLoggerApp::startMissionLogging() {
 }
 
 void SharkLoggerApp::startPersistentLogging() {
-  ROS_ERROR("SL: stahtpl");
   if (!_persistentIsLogging) {
-    _persistentRecorder = new rosbag::ActuallyUsefulRecorder(_prOptions);
-    _persistentThread = new boost::thread(boost::bind(&SharkLoggerApp::persistentLoggingThread, this));
-    //_persistentThread->detach();
-    _persistentRecorder->_startRunning = true;
+    boost::thread p(boost::bind(&SharkLoggerApp::persistentLoggingThread, this));
+    _persistentRecorder._stopRunning = false;
+    _persistentRecorder._startRunning = true;
     _persistentIsLogging = true;
   } else {
     ROS_ERROR("One persistent logger is already active.  Cannot start a second");
@@ -203,19 +204,8 @@ void SharkLoggerApp::startPersistentLogging() {
 }
 
 void SharkLoggerApp::stopMissionLogging() {
-  ROS_ERROR("SL: stopml");
   if (_missionIsLogging) {
-    ROS_ERROR("Mission is logging");
-    //pthread_kill(_missionThread->native_handle(), 9);
-    //pthread_cancel(_missionThread->native_handle());
-    _missionRecorder->_stopRunning = true;
-    ROS_ERROR("GONNA JOIN MIS");
-    _missionThread->join();
-    ROS_ERROR("MIS JOINED");
-    //delete _missionRecorder;
-    //delete _missionThread;
-    //_missionRecorder = NULL;
-    //_missionThread = NULL;
+    _missionRecorder.stopRecording();
     _missionIsLogging = false;
   } else {
     ROS_ERROR("No mission logger is active.  Cannot stop it...");
@@ -224,40 +214,12 @@ void SharkLoggerApp::stopMissionLogging() {
 
 void SharkLoggerApp::stopPersistentLogging() {
   if (_persistentIsLogging) {
-    _persistentRecorder->_stopRunning = true;
-    _persistentThread->join();
+    _persistentRecorder.stopRecording();
     _persistentIsLogging = false;
   } else {
     ROS_ERROR("No persistent logger is active.  Cannot stop it...");
   }
 }
-
-void SharkLoggerApp::startr() {
-  ROS_ERROR("SL: startr");
-  if (!_missionIsLogging) {
-    _r = new rosbag::ActuallyUsefulRecorder(_mrOptions);
-    _r->run();
-    //_r = new boost::thread(boost::bind(&SharkLoggerApp::missionLoggingThread, this));
-    _missionIsLogging = true;
-  } else {
-    ROS_ERROR("One r logger is already active.  Cannot start a second");
-  }
-}
-
-void SharkLoggerApp::stopr() {
-  ROS_ERROR("SL: stopr");
-  if (_missionIsLogging) {
-    ROS_ERROR("r is logging");
-   _r->~ActuallyUsefulRecorder();
-   delete _r;
-   //delete _missionThread;
-   _missionIsLogging = false;
-} else {
-  ROS_ERROR("No r logger is active.  Cannot stop it...");
-}
-}
-
-
 
 }
 }

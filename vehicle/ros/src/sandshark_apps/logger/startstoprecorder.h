@@ -1,14 +1,12 @@
 /*
- * actuallyusefulrecorder.h
+ * startstoprecorder.h
  *
  *  Created on: Nov 2, 2015
  *      Author: brenden
  */
 
-#ifndef ACTUALLYUSEFULRECORDER_H_
-#define ACTUALLYUSEFULRECORDER_H_
-
-
+#ifndef STARTSTOPRECORDER_H_
+#define STARTSTOPRECORDER_H_
 
 #include <sys/stat.h>
 #if !defined(_MSC_VER)
@@ -58,9 +56,9 @@ public:
     ros::Time                    time;
 };
 
-struct ActuallyUsefulRecorderOptions
+struct StartStopRecorderOptions
 {
-    ActuallyUsefulRecorderOptions();
+    StartStopRecorderOptions();
 
     bool            trigger;
     bool            record_all;
@@ -87,10 +85,13 @@ struct ActuallyUsefulRecorderOptions
     std::vector<std::string> topics;
 };
 
-class ActuallyUsefulRecorder
+class StartStopRecorder
 {
 public:
-    ActuallyUsefulRecorder(ActuallyUsefulRecorderOptions const& options);
+    StartStopRecorder(StartStopRecorderOptions const& options);
+    StartStopRecorder();
+
+    void setOptions(StartStopRecorderOptions const& options);
 
     void doTrigger();
 
@@ -100,9 +101,13 @@ public:
 
     int run();
 
+    void startRecording();
+    void stopRecording();
+
+    //state variables to control when the record thread should actually be writing or not
+    //they are also used in thread stop detection and shutdown
     bool _stopRunning;
     bool _startRunning;
-
 private:
     void printUsage();
 
@@ -115,7 +120,6 @@ private:
     bool checkDisk();
 
     void snapshotTrigger(std_msgs::Empty::ConstPtr trigger);
-    //    void doQueue(topic_tools::ShapeShifter::ConstPtr msg, std::string const& topic, boost::shared_ptr<ros::Subscriber> subscriber, boost::shared_ptr<int> count);
     void doQueue(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event, std::string const& topic, boost::shared_ptr<ros::Subscriber> subscriber, boost::shared_ptr<int> count);
     void doRecord();
     bool checkSize();
@@ -129,7 +133,7 @@ private:
     static std::string timeToStr(T ros_t);
 
 private:
-    ActuallyUsefulRecorderOptions               options_;
+    StartStopRecorderOptions               options_;
 
     Bag                           bag_;
 
@@ -159,9 +163,12 @@ private:
     boost::mutex                  check_disk_mutex_;
     ros::WallTime                 check_disk_next_;
     ros::WallTime                 warn_next_;
+
+    //Pointer to the recordthread
+    boost::thread * _recordThreadPtr;
 };
 
 } // namespace rosbag
 
 
-#endif /* ACTUALLYUSEFULRECORDER_H_ */
+#endif /* STARTSTOPRECORDER_H_ */
