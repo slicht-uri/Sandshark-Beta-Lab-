@@ -1,0 +1,14 @@
+This document explains how to obtain and build QGroundControl, which is used as the operator tool suite for the sandshark vehicle
+
+Topside Instructions(The following instructions were designed and tested for an Ubuntu 14.04 system):
+
+-Installing Qt5.4 and dependencies
+--Install Qt5.4, as demonstrated in the following video https://www.youtube.com/watch?v=to1qlTUbQ-w
+--Install the following dependencies for building QGroundControl: (sudo apt-get install espeak libespeak-dev libudev-dev libsdl1.2-dev)
+
+-Building / Running QGroundControl
+--Open the .../topside/qgc/qgroundcontrol.pro project in QtCreator.
+--Run the project using QtCreator
+--The initial build can take upwards of 30 minutes, and QGC will pop open when completed. 
+
+Instructions on how to use QGroundControl with a Sandshark vehicle can be found in the Sandshark User's Manual
