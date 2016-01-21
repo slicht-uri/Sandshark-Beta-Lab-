@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<svg width="185" height="110" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - http://svg-edit.googlecode.com/ -->
+ <defs>
+  <linearGradient id="svg_164">
+   <stop stop-color="#ffff00" offset="0.22528"/>
+   <stop stop-color="#0000ff" offset="1"/>
+  </linearGradient>
+ </defs>
+ <g>
+  <title>Layer 1</title>
+  <circle fill="#ffff00" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" cx="143.89012" cy="84.5884" r="10.79013" id="svg_165" stroke="#000000" stroke-width="0"/>
+  <circle fill="#000000" stroke-width="0" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" cx="43.78709" cy="55.28127" r="10.92655" id="svg_167" stroke="#000000"/>
+  <rect fill="#ffff00" stroke-width="0" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" x="41.33193" y="58.64596" width="104.38899" height="22.33193" id="svg_163" transform="rotate(16.364931106567383 93.52642822265629,69.81193542480472) " stroke="#000000"/>
+  <rect fill="#000000" stroke-width="0" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" x="42.40146" y="49.6896" width="40.64282" height="22.33193" transform="rotate(16.364931106567383 62.72286987304686,60.85557556152344) " id="svg_168" stroke="#000000"/>
+  <rect fill="#0000ff" stroke="#000000" stroke-width="0" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" x="22.19235" y="38.43261" width="12.33984" height="23.49316" id="svg_179" transform="rotate(16.50434112548828 28.362274169921843,50.17919921875) "/>
+  <rect fill="#0000ff" stroke="#000000" stroke-width="0" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" x="49.48239" y="9.48144" width="0.2373" height="0" id="svg_181"/>
+  <rect stroke="#000000" fill="#0000ff" stroke-width="0" stroke-dasharray="null" stroke-linejoin="null" stroke-linecap="null" x="8.62495" y="5.43751" width="171.375007" height="16.875" id="svg_183"/>
+ </g>
+</svg>

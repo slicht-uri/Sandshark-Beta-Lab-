@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="185" height="120" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - http://svg-edit.googlecode.com/ -->
+
+ <g>
+  <title>Layer 1</title>
+  <circle stroke-width="0" stroke="#000000" id="svg_165" r="11.10547" cy="56.94185" cx="159.96117" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" fill="#b2b2b2"/>
+  <circle stroke="#000000" id="svg_167" r="10.92578" cy="57.03127" cx="45.88865" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="#666666"/>
+  <rect stroke="#000000" id="svg_163" height="22.37055" width="74.82312" y="45.79388" x="85.45406" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="#b2b2b2"/>
+  <rect stroke="#000000" id="svg_168" height="22.33193" width="40.64282" y="45.76772" x="44.81943" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="#666666"/>
+  <rect id="svg_179" height="23.49316" width="12.33984" y="45.43651" x="23.6611" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" stroke="#000000" fill="#3f3f3f"/>
+  <rect id="svg_181" height="0" width="0.2373" y="9.48144" x="49.48239" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" stroke="#000000" fill="#0000ff"/>
+  <rect id="svg_1" height="12.97266" width="7.27734" y="32.89455" x="61.78907" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" stroke="#000000" fill="#3f3f3f"/>
+  <text transform="matrix(0.534483, 0, 0, 0.489069, 10.0086, 50.553)" xml:space="preserve" text-anchor="middle" font-family="serif" font-size="24" id="svg_3" y="113.810598" x="152.903224" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" stroke="#000000" fill="#7f7f7f">UUV</text>
+ </g>
+</svg>
