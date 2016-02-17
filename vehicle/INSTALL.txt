@@ -8,17 +8,22 @@ Vehicle-Side Instructions (The following instructions were designed and tested f
 --Download and install ROS Indigo "Desktop Install" by following the instructions at: http://wiki.ros.org/indigo/Installation/Ubuntu
 
 -Setting up the sysroot (an arm sysroot including ros compiled for arm is used to cross compile the code for the Sandshark)
+--Clone the sandshark github repo into your home folder (cd ~/ && git clone https://github.com/bluefinrobotics/sandshark.git)
 --Make a /usr/local/bluefin directory (mkdir -p /usr/local/bluefin)
---Extract the contents of .../vehicle/adapt-sysroot.tar.bz2 into /usr/local/bluefin
+--Make a /home/adapt directory (mkdir -p /home/adapt)
 --Make the following symlinks:
-sudo mkdir /home/adapt/rosalign
-ln -s /usr/local/bluefin/adapt-sysroot/ros_install_isolated install_isolated
-sudo mkdir /home/adapt/ADAPT
-ln -s /usr/local/bluefin/adapt-sysroot titan-sysroot
+---sudo ln -s /home/<username>/sandshark/vehicle/adapt-sysroot /usr/local/bluefin/adapt-sysroot
+---sudo mkdir /home/adapt/rosalign
+---sudo ln -s /usr/local/bluefin/adapt-sysroot/ros_install_isolated /home/adapt/rosalign/install_isolated
+---sudo mkdir /home/adapt/ADAPT
+---sudo ln -s /usr/local/bluefin/adapt-sysroot /home/adapt/ADAPT/titan-sysroot
+--change the owner and group of the /data/app/bluefin/opt/ros_xc directory to your username (sudo chown <username>:<username> /data/app/bluefin/opt/ros_xc)
+--change permissions of the /data/app/bluefin/opt/ros_xc directory to 775 (sudo chmod 755 /data/app/bluefin/opt/ros_xc)
 
 -Building the code
 --Make a /data/app/bluefin/opt/ros_xc directory (sudo mkdir /data/app/bluefin/opt/ros_xc)  This is where catkin will put all of the executables and libraries after they are built
---Run the build_arm.sh script in the .../vehicle/ros directory.  The build should complete in around 2 minutes.
+-- cd to the ~/sandshark/vehicle/ros directory
+--Run the build_arm.sh script.  The build should complete in around 2 minutes.
 
 -Deploying code to the vehicle
 --To deploy code to a vehicle, ensure that the build machine is on the same network and run the build_arm.sh script with the vehicle's IP address as an argument (./build_arm.sh xxx.xxx.xxx.xxx)
