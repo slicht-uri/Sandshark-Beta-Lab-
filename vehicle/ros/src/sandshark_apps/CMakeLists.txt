@@ -17,7 +17,7 @@ add_executable(sandshark_navigation_node navigation/navigation_node.cpp)
 add_executable(sandshark_objectivecontrol_node objectivecontrol/objectivecontrol_node.cpp)
 add_executable(sandshark_pathplanning_node pathplanning/pathplanning_node.cpp)
 
-add_executable(sandshark_sharklogger_node logger/sharklogger_node.cpp logger/actuallyusefulrecorder.cpp)
+add_executable(sandshark_sharklogger_node logger/sharklogger_node.cpp logger/startstoprecorder.cpp)
 
 
 target_link_libraries(sandshark_actionselector_node ${catkin_LIBRARIES})

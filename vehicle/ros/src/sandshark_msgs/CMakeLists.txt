@@ -51,6 +51,8 @@ PID.msg
 PowerUsage.msg
 Shutdown.msg
 Speed.msg
+StartMissionLog.msg
+StopMissionLog.msg
 TailconePowerUsage.msg
 TailconeRaw.msg
 TailconeState.msg
