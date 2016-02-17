@@ -1,0 +1,8 @@
+prefix=/home/adapt/rosalign/install_isolated
+
+Name: rosbag_storage
+Description: Description of rosbag_storage
+Version: 1.10.1
+Cflags: -I/home/adapt/rosalign/install_isolated/include -I/home/adapt/ADAPT/titan-sysroot/usr/include
+Libs: -L/home/adapt/rosalign/install_isolated/lib -lrosbag_storage -l:/home/adapt/rosalign/install_isolated/lib/libconsole_bridge.so /home/adapt/ADAPT/titan-sysroot/lib/libboost_date_time.a /home/adapt/ADAPT/titan-sysroot/lib/libboost_filesystem.a /home/adapt/ADAPT/titan-sysroot/lib/libboost_program_options.a /home/adapt/ADAPT/titan-sysroot/lib/libboost_regex.a
+Requires: 

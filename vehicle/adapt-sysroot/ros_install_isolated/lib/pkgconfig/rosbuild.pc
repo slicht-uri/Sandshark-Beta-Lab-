@@ -1,0 +1,8 @@
+prefix=/home/adapt/rosalign/install_isolated
+
+Name: rosbuild
+Description: Description of rosbuild
+Version: 1.10.9
+Cflags: 
+Libs: -L/home/adapt/rosalign/install_isolated/lib 
+Requires: 

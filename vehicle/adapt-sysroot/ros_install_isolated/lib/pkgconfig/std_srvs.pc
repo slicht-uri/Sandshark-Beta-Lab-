@@ -1,0 +1,8 @@
+prefix=/home/adapt/rosalign/install_isolated
+
+Name: std_srvs
+Description: Description of std_srvs
+Version: 1.10.1
+Cflags: -I/home/adapt/rosalign/install_isolated/include
+Libs: -L/home/adapt/rosalign/install_isolated/lib 
+Requires: message_runtime

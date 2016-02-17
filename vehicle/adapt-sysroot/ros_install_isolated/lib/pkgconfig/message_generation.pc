@@ -1,0 +1,8 @@
+prefix=/home/adapt/rosalign/install_isolated
+
+Name: message_generation
+Description: Description of message_generation
+Version: 0.2.10
+Cflags: 
+Libs: -L/home/adapt/rosalign/install_isolated/lib 
+Requires: gencpp genlisp genmsg genpy
