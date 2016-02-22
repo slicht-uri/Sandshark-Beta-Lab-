@@ -55,15 +55,16 @@
         <param name="correctTailconePerRoll" value="true" /> 
         <rosparam>
           rpm_to_speed_map: {
-          "-2500":"-4.0",
-          "0"   : "0.0",
-          "300" : "1.3",
-          "600" : "2.4",
-          "900" : "3.3",
-          "1200": "4.0",
-          "1500": "4.5",
-          "2000": "5.0",
-          "2500": "5.4"}
+          "-2500":"-3.000",
+          "-900" :"-1.139",
+          "0"   : "0.000",
+          "300" : "0.311",
+          "600" : "0.725",
+          "900" : "1.139",
+          "1200": "1.553",
+          "1500": "1.967",
+          "2000": "2.657",
+          "2500": "3.000"}
         </rosparam>
         <rosparam command="load" file="/data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/dynamiccontrol.yaml" />
     </node>
