@@ -31,16 +31,16 @@ if [ $# -gt 0 ]; then
     cd /data/app/bluefin/opt/
     tar -czf catkin_package.tgz ros_xc
     cd $CUR_DIR
-    ssh root@$1 'rm -r /data/app/bluefin/opt'
-    ssh root@$1 'mkdir /data/app/bluefin/opt'
-    scp /data/app/bluefin/opt/catkin_package.tgz root@$1:/data/app/bluefin/opt/
-    scp bin/launch.sh root@$1:/data/app/bluefin/bin
-    ssh root@$1 'cd /data/app/bluefin/opt; rm -rf ros_xc 2> /dev/null; tar -xf catkin_package.tgz'
-    scp sysfiles/mkshrc root@$1:/system/etc
-    scp sysfiles/authorized_keys root@$1:/data/ssh/
-    scp sysfiles/ip_address.txt root@$1:/data/app/bluefin/bin
-    ssh root@$1 'chmod 600 /data/ssh/authorized_keys'
-    scp sysfiles/wpa_supplicant.conf root@$1:/data/misc/wifi
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'rm -r /data/app/bluefin/opt'
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'mkdir /data/app/bluefin/opt'
+    scp -i sysfiles/sandshark_operator.openssh /data/app/bluefin/opt/catkin_package.tgz root@$1:/data/app/bluefin/opt/
+    scp -i sysfiles/sandshark_operator.openssh bin/launch.sh root@$1:/data/app/bluefin/bin
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'cd /data/app/bluefin/opt; rm -rf ros_xc 2> /dev/null; tar -xf catkin_package.tgz'
+    scp -i sysfiles/sandshark_operator.openssh sysfiles/mkshrc root@$1:/system/etc
+    scp -i sysfiles/sandshark_operator.openssh sysfiles/authorized_keys root@$1:/data/ssh/
+    scp -i sysfiles/sandshark_operator.openssh sysfiles/ip_address.txt root@$1:/data/app/bluefin/bin
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'chmod 600 /data/ssh/authorized_keys'
+    scp -i sysfiles/sandshark_operator.openssh sysfiles/wpa_supplicant.conf root@$1:/data/misc/wifi
 else
     echo "Not Deploying, no IP address passed"
 fi
