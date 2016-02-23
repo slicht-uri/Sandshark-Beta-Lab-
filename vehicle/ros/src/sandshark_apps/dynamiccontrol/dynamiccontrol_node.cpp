@@ -58,7 +58,6 @@ class DynamicControlApp: public TaskBase {
     ros::Time _lastRunTime;
 
     double _rpmToMetersPerSec;
-    double _actuatorLimit;
     bool _correctTailconePerRoll;
 
     // map of double to double is not supported for some reason
@@ -66,7 +65,6 @@ class DynamicControlApp: public TaskBase {
     std::vector<std::pair<double, double> > _speedV;
 
     ros::Rate * _rate;
-    void limitActuators();
     double getMPSfromRPM(double rpm);
     void cleanup();
   protected:
@@ -219,9 +217,6 @@ void DynamicControlApp::startupInitCallback() {
 
   _privateNode->param("rpm_to_speed", _rpmToMetersPerSec, double(0.001));
 
-  // bidirectional rudder/elevator limit (in degrees)
-  _privateNode->param("actuatorLimit", _actuatorLimit, double(25.0));
-
   _privateNode->param("correctTailconePerRoll", _correctTailconePerRoll, false);
 
   //we can only read this in as a map of string to string
@@ -303,30 +298,14 @@ bool DynamicControlApp::doRun() {
     //essentially convert the altitude to a depth and pass it down
     vertCmd = _depthMeasured + _altitudeMeasured - vertCmd;
   case (VM_DEPTH):
-      //bound our depth error to 5 meters max - done to try and make it so that input to pitch doesn't saturate.
-    if (vertCmd > _depthMeasured + 5.0) {
-      vertCmd = _depthMeasured + 5.0;
-    } else if (vertCmd < _depthMeasured - 5.0) {
-      vertCmd = _depthMeasured - 5.0;
-    }
-
     //Should be in radians?!?!?!?, output should be radians but input is meters
     vertCmd = -1.0 * _depthPID->process(vertCmd, _depthMeasured, dt.toSec());
-
   case (VM_PITCH):
     if (_vertical_mode == VM_PITCH) {
       //convert to radians if the pitch command is direct, otherwise it will already be radians
       vertCmd = ( _verticalDesired / 180.0 ) * M_PI;
     }
-
-  //radians bound the pitch to 30 degrees
-  if (vertCmd > 0.523) {
-    vertCmd = 0.523;
-  } else if (vertCmd < - 0.523) {
-    vertCmd = - 0.523;
-  }
     vertCmd = _pitchPID->process(vertCmd, (_pitchMeasured / 180.0 * M_PI), dt.toSec());
-
     //here we are putting our pitch pid output radians into the elevator PID (in firmware)
     //we might need a conversion factor like the depth case, although it is less likely
   case (VM_ELEVATOR):
@@ -343,18 +322,18 @@ bool DynamicControlApp::doRun() {
     break;
   case (HM_HEADING):
     horizCmd = _headingPID->process(horizCmd, (_bearingMeasured / 180.0 * M_PI), dt.toSec());
+
+  //make sure heading is the right direction
+  while (horizCmd < -M_PI) {
+    horizCmd += 2*M_PI;
+  }
+  while (horizCmd > M_PI) {
+    horizCmd -= 2*M_PI;
+  }
   case (HM_RUDDER):
     //Output rudder in degrees
     _tailCmdMsg.rudder = (horizCmd / M_PI) * 180.0;
     break;
-  }
-
-  //make sure heading is the right direction
-  while (_tailCmdMsg.rudder < -180.0) {
-    _tailCmdMsg.rudder += 360.0;
-  }
-  while (_tailCmdMsg.rudder > 180.0) {
-    _tailCmdMsg.rudder -= 360.0;
   }
 
   if (_correctTailconePerRoll) {
@@ -366,8 +345,6 @@ bool DynamicControlApp::doRun() {
     _tailCmdMsg.rudder = rudder * cos(rollRads) - elevator * sin(rollRads);
   }
 
-  limitActuators();
-
   _tailCmdMsg.thruster = _rpmDesired;
   //Flip for reverse motion
   if (_rpmDesired < 0.0) {
@@ -377,23 +354,6 @@ bool DynamicControlApp::doRun() {
   _tailCmdPub.publish(_tailCmdMsg);
 
   return true;
-}
-
-void DynamicControlApp::limitActuators() {
-
-  //clip rudder and elevator (in degrees)
-  if (_tailCmdMsg.rudder > _actuatorLimit) {
-    _tailCmdMsg.rudder = _actuatorLimit;
-  } else if (_tailCmdMsg.rudder < -1 * _actuatorLimit) {
-    _tailCmdMsg.rudder = -1 * _actuatorLimit;
-  }
-
-  if (_tailCmdMsg.elevator > _actuatorLimit) {
-    _tailCmdMsg.elevator = _actuatorLimit;
-  } else if (_tailCmdMsg.elevator < -1 * _actuatorLimit) {
-    _tailCmdMsg.elevator = -1 * _actuatorLimit;
-  }
-
 }
 
 double DynamicControlApp::getMPSfromRPM(double rpm) {
