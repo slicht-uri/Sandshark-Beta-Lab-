@@ -17,12 +17,12 @@ Vehicle-Side Instructions (The following instructions were designed and tested f
 ---sudo ln -s /usr/local/bluefin/adapt-sysroot/ros_install_isolated /home/adapt/rosalign/install_isolated
 ---sudo mkdir /home/adapt/ADAPT
 ---sudo ln -s /usr/local/bluefin/adapt-sysroot /home/adapt/ADAPT/titan-sysroot
+--Make a /data/app/bluefin/opt/ros_xc directory (sudo mkdir -p /data/app/bluefin/opt/ros_xc)  This is where catkin will put all of the executables and libraries after they are built
 --change the owner and group of the /data/app/bluefin/opt/ros_xc directory to your username (sudo chown <username>:<username> /data/app/bluefin/opt/ros_xc)
 --change permissions of the /data/app/bluefin/opt/ros_xc directory to 775 (sudo chmod 755 /data/app/bluefin/opt/ros_xc)
 
 -Building the code
---Make a /data/app/bluefin/opt/ros_xc directory (sudo mkdir /data/app/bluefin/opt/ros_xc)  This is where catkin will put all of the executables and libraries after they are built
--- cd to the ~/sandshark/vehicle/ros directory
+--cd to the ~/sandshark/vehicle/ros directory
 --Run the build_arm.sh script.  The build should complete in around 2 minutes.
 
 -Deploying code to the vehicle
