@@ -38,11 +38,12 @@ if [ $# -gt 0 ]; then
    cd $CUR_DIR
    if [ "$1" = "adb" ]; then
      adb shell rm -r /data/app/bluefin/opt
-     adb shell mkdir /data/app/bluefin/opt
+     adb shell mkdir -p /data/app/bluefin/opt
      adb push /data/app/bluefin/opt/catkin_package.tgz /data/app/bluefin/opt
-     adb push bin/launch.sh /data/app/bluefin/bin/
      adb shell rm -rf /data/app/bluefin/opt/ros_xc 2> /dev/null
      adb shell 'cd /data/app/bluefin/opt && tar -xf catkin_package.tgz'
+     adb shell mkdir -p /data/app/bluefin/bin
+     adb push bin/launch.sh /data/app/bluefin/bin/
      adb push sysfiles/mkshrc /system/etc/
      adb push sysfiles/authorized_keys /data/ssh/
      adb push sysfiles/ip_address.txt /data/app/bluefin/bin/
@@ -50,8 +51,9 @@ if [ $# -gt 0 ]; then
      adb push sysfiles/wpa_supplicant.conf /data/misc/wifi/
    else
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'rm -r /data/app/bluefin/opt'
-    ssh -i sysfiles/sandshark_operator.openssh root@$1 'mkdir /data/app/bluefin/opt'
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'mkdir -p /data/app/bluefin/opt'
     scp -i sysfiles/sandshark_operator.openssh /data/app/bluefin/opt/catkin_package.tgz root@$1:/data/app/bluefin/opt/
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'mkdir -p /data/app/bluefin/bin'
     scp -i sysfiles/sandshark_operator.openssh bin/launch.sh root@$1:/data/app/bluefin/bin
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'cd /data/app/bluefin/opt; rm -rf ros_xc 2> /dev/null; tar -xf catkin_package.tgz'
     scp -i sysfiles/sandshark_operator.openssh sysfiles/mkshrc root@$1:/system/etc
