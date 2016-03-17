@@ -9,8 +9,8 @@ Vehicle-Side Instructions (The following instructions were designed and tested f
 
 -Setting up the sysroot (an arm sysroot including ros compiled for arm is used to cross compile the code for the Sandshark)
 --Clone the sandshark github repo into your home folder (cd ~/ && git clone https://github.com/bluefinrobotics/sandshark.git)
---Make a /usr/local/bluefin directory (mkdir -p /usr/local/bluefin)
---Make a /home/adapt directory (mkdir -p /home/adapt)
+--Make a /usr/local/bluefin directory (sudo mkdir -p /usr/local/bluefin)
+--Make a /home/adapt directory (sudo mkdir -p /home/adapt)
 --Make the following symlinks:
 ---sudo ln -s /home/<username>/sandshark/vehicle/adapt-sysroot /usr/local/bluefin/adapt-sysroot
 ---sudo mkdir /home/adapt/rosalign
