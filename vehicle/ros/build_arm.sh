@@ -24,13 +24,31 @@ export CMAKE_PREFIX_PATH=/usr/local/bluefin/adapt-sysroot/ros_install_isolated
                                         -DPYTHON_INCLUDE_DIR2=/usr/local/bluefin/adapt-sysroot/usr/include/python2.7/ \
                                         --make-args VERBOSE=1
 
+if [ $? -gt 0 ]; then
+    echo "Build failed, not deploying."
+    exit
+fi
+
 if [ $# -gt 0 ]; then
-    CUR_DIR=$PWD
-    echo "cur dir"
-    echo $CUR_DIR
-    cd /data/app/bluefin/opt/
-    tar -czf catkin_package.tgz ros_xc
-    cd $CUR_DIR
+   CUR_DIR=$PWD
+   echo "cur dir"
+   echo $CUR_DIR
+   cd /data/app/bluefin/opt
+   tar -czf catkin_package.tgz ros_xc
+   cd $CUR_DIR
+   if [ "$1" = "adb" ]; then
+     adb shell rm -r /data/app/bluefin/opt
+     adb shell mkdir /data/app/bluefin/opt
+     adb push /data/app/bluefin/opt/catkin_package.tgz /data/app/bluefin/opt
+     adb push bin/launch.sh /data/app/bluefin/bin/
+     adb shell rm -rf /data/app/bluefin/opt/ros_xc 2> /dev/null
+     adb shell 'cd /data/app/bluefin/opt && tar -xf catkin_package.tgz'
+     adb push sysfiles/mkshrc /system/etc/
+     adb push sysfiles/authorized_keys /data/ssh/
+     adb push sysfiles/ip_address.txt /data/app/bluefin/bin/
+     adb shell chmod 600 /data/ssh/authorized_keys
+     adb push sysfiles/wpa_supplicant.conf /data/misc/wifi/
+   else
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'rm -r /data/app/bluefin/opt'
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'mkdir /data/app/bluefin/opt'
     scp -i sysfiles/sandshark_operator.openssh /data/app/bluefin/opt/catkin_package.tgz root@$1:/data/app/bluefin/opt/
@@ -41,6 +59,8 @@ if [ $# -gt 0 ]; then
     scp -i sysfiles/sandshark_operator.openssh sysfiles/ip_address.txt root@$1:/data/app/bluefin/bin
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'chmod 600 /data/ssh/authorized_keys'
     scp -i sysfiles/sandshark_operator.openssh sysfiles/wpa_supplicant.conf root@$1:/data/misc/wifi
+   fi
 else
     echo "Not Deploying, no IP address passed"
 fi
+
