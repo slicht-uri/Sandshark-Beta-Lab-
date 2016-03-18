@@ -22,6 +22,7 @@ CurrentSense.msg
 Depth.msg
 DynamicControlCommand.msg
 DynamicControlGains.msg
+DynamicRequestsStatus.msg
 ElapsedMissionTime.msg
 Environmental.msg
 GasGauge.msg
