@@ -34,6 +34,6 @@ export ROS_MASTER_URI=http://127.0.0.1:11311
 export ROS_HOME=/data/app/
 export ROS_IP=127.0.0.1
 
-source /data/app/bluefin/opt/ros_xc/share/sandshark_common/misc/runtimeEnv.bash
+source /data/app/bluefin/opt/sandshark/share/sandshark_common/misc/runtimeEnv.bash
 
 : place customisations above this line

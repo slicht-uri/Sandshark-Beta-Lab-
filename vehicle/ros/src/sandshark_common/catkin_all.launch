@@ -1,7 +1,7 @@
 <launch>
     <node name="motion" pkg="sandshark_drivers" type="sandshark_motion_node" respawn="false">
         <param name="startDelay" value="60.0"/>
-        <rosparam command="load" file="/data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/motion.yaml" />
+        <rosparam command="load" file="/data/app/bluefin/opt/sandshark/share/sandshark_apps/config/motion.yaml" />
     </node>
     
     <node name="gps" pkg="sandshark_drivers" type="sandshark_gps_node" respawn="false">
@@ -66,7 +66,7 @@
           "2000": "2.657",
           "2500": "3.000"}
         </rosparam>
-        <rosparam command="load" file="/data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/dynamiccontrol.yaml" />
+        <rosparam command="load" file="/data/app/bluefin/opt/sandshark/share/sandshark_apps/config/dynamiccontrol.yaml" />
     </node>
 
     <node name="objectivecontrol" pkg="sandshark_apps" type="sandshark_objectivecontrol_node" respawn="false">

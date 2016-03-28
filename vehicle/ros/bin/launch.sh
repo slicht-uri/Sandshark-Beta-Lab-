@@ -55,14 +55,11 @@ am startservice com.bluefinrobotics.bluefingps/com.bluefinrobotics.bluefingps.Bl
 
 sleep 5
 
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/app/bluefin/opt/ros_xc/lib
-#export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/data/app/bluefin/opt/ros_xc/lib
-
-source /data/app/bluefin/opt/ros_xc/share/sandshark_common/launch/runtimeEnv.bash
+source /data/app/bluefin/opt/sandshark/share/sandshark_common/launch/runtimeEnv.bash
 
 killall python rosout sandshark_mavlink_node sandshark_gps_node sandshark_motion_node sandshark_navigation_node
 
-taskset 0x01 roslaunch /data/app/bluefin/opt/ros_xc/share/sandshark_common/launch/catkin_all.launch&
+taskset 0x01 roslaunch /data/app/bluefin/opt/sandshark/share/sandshark_common/launch/catkin_all.launch&
 
 
 sleep 2

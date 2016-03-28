@@ -187,7 +187,7 @@ bool DynamicControlApp::handleGainUpdate(sandshark_msgs::UpdateDCGain::Request &
       //we shouldn't be here
       break;
     }
-    system("rosparam dump /data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/dynamiccontrol.yaml /dynamiccontrol");
+    system("rosparam dump /data/app/bluefin/opt/sandshark/share/sandshark_apps/config/dynamiccontrol.yaml /dynamiccontrol");
     res.accepted = true;
   } else {
     res.accepted = false;

@@ -16,7 +16,7 @@ export ROS_PACKAGE_PATH=/usr/local/bluefin/adapt-sysroot/ros_install_isolated/sh
 export ROS_ETC_DIR=/usr/local/bluefin/adapt-sysroot/ros_install_isolated/etc/ros
 export CMAKE_PREFIX_PATH=/usr/local/bluefin/adapt-sysroot/ros_install_isolated
 
-/opt/ros/indigo/bin/catkin_make install -DCMAKE_INSTALL_PREFIX=/data/app/bluefin/opt/ros_xc \
+/opt/ros/indigo/bin/catkin_make install -DCMAKE_INSTALL_PREFIX=/data/app/bluefin/opt/sandshark \
                                         -DCMAKE_TOOLCHAIN_FILE=$PWD/android.toolchain \
                                         -DIN_SIM=OFF \
                                         -DPYTHON_INCLUDE_DIR=/usr/local/bluefin/adapt-sysroot/usr/include/python2.7/ \
@@ -34,7 +34,7 @@ if [ $# -gt 0 ]; then
    echo "cur dir"
    echo $CUR_DIR
    cd /data/app/bluefin/opt
-   tar -czf catkin_package.tgz ros_xc
+   tar -czf catkin_package.tgz sandshark
    cd $CUR_DIR
    if [ "$1" = "adb" ]; then
      adb shell rm -r /data/app/bluefin/opt
@@ -50,12 +50,14 @@ if [ $# -gt 0 ]; then
      adb shell chmod 600 /data/ssh/authorized_keys
      adb push sysfiles/wpa_supplicant.conf /data/misc/wifi/
    else
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'rm /data/app/bluefin/opt'
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'rm -r /data/app/bluefin/bin'
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'rm -r /data/app/bluefin/opt'
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'mkdir -p /data/app/bluefin/opt'
     scp -i sysfiles/sandshark_operator.openssh /data/app/bluefin/opt/catkin_package.tgz root@$1:/data/app/bluefin/opt/
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'mkdir -p /data/app/bluefin/bin'
     scp -i sysfiles/sandshark_operator.openssh bin/launch.sh root@$1:/data/app/bluefin/bin
-    ssh -i sysfiles/sandshark_operator.openssh root@$1 'cd /data/app/bluefin/opt; rm -rf ros_xc 2> /dev/null; tar -xf catkin_package.tgz'
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'cd /data/app/bluefin/opt; rm -rf sandshark 2> /dev/null; tar -xf catkin_package.tgz'
     scp -i sysfiles/sandshark_operator.openssh sysfiles/mkshrc root@$1:/system/etc
     scp -i sysfiles/sandshark_operator.openssh sysfiles/authorized_keys root@$1:/data/ssh/
     scp -i sysfiles/sandshark_operator.openssh sysfiles/ip_address.txt root@$1:/data/app/bluefin/bin

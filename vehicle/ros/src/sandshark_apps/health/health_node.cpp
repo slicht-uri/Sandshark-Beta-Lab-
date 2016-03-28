@@ -441,7 +441,7 @@ void HealthApp::startupInitCallback() {
   _lastAbortPub = _publicNode->advertise<sandshark_msgs::LastAbort>("last_abort", 1);
   _applicationAbortSub = _publicNode->subscribe("/objectivecontrol/abort", 1, &HealthApp::msgApplicationAbortCallback, this);
 
-  system("rosparam load /data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/health.yaml /health");
+  system("rosparam load /data/app/bluefin/opt/sandshark/share/sandshark_apps/config/health.yaml /health");
 
 }
 
@@ -710,7 +710,7 @@ bool HealthApp::handleValueUpdate(sandshark_msgs::UpdateHealthVal::Request &req,
       //we shouldn't be here
       break;
     }
-    system("rosparam dump /data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/health.yaml /health");
+    system("rosparam dump /data/app/bluefin/opt/sandshark/share/sandshark_apps/config/health.yaml /health");
     res.accepted = true;
   } else {
     res.accepted = false;

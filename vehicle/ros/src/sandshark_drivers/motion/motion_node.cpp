@@ -452,7 +452,7 @@ void MotionDriver::reset(bool writeParams) {
   if (writeParams) {
     ROS_INFO("Writing parameters...");
     //System calls are so dirty, there has to be a better way to do this
-    system("rosparam dump /data/app/bluefin/opt/ros_xc/share/sandshark_apps/config/motion.yaml /motion");
+    system("rosparam dump /data/app/bluefin/opt/sandshark/share/sandshark_apps/config/motion.yaml /motion");
     ROS_INFO("Done");
   }
 }
