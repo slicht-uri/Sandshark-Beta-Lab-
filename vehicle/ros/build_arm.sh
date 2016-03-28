@@ -40,7 +40,7 @@ if [ $# -gt 0 ]; then
      adb shell rm -r /data/app/bluefin/opt
      adb shell mkdir -p /data/app/bluefin/opt
      adb push /data/app/bluefin/opt/catkin_package.tgz /data/app/bluefin/opt
-     adb shell rm -rf /data/app/bluefin/opt/ros_xc 2> /dev/null
+     adb shell rm -rf /data/app/bluefin/opt/sandshark 2> /dev/null
      adb shell 'cd /data/app/bluefin/opt && tar -xf catkin_package.tgz'
      adb shell mkdir -p /data/app/bluefin/bin
      adb push bin/launch.sh /data/app/bluefin/bin/
