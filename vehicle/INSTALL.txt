@@ -17,9 +17,10 @@ Vehicle-Side Instructions (The following instructions were designed and tested f
 ---sudo ln -s /usr/local/bluefin/adapt-sysroot/ros_install_isolated /home/adapt/rosalign/install_isolated
 ---sudo mkdir /home/adapt/ADAPT
 ---sudo ln -s /usr/local/bluefin/adapt-sysroot /home/adapt/ADAPT/titan-sysroot
---Make a /data/app/bluefin/opt/ros_xc directory (sudo mkdir -p /data/app/bluefin/opt/ros_xc)  This is where catkin will put all of the executables and libraries after they are built
---change the owner and group of the /data/app/bluefin/opt/ros_xc directory to your username (sudo chown <username>:<username> /data/app/bluefin/opt/ros_xc)
---change permissions of the /data/app/bluefin/opt/ros_xc directory to 775 (sudo chmod 755 /data/app/bluefin/opt/ros_xc)
+---sudo ln -s /home/<username>/sandshark/vehicle/adapt-sysroot/android.cmake /usr/share/cmake-2.8/Modules/Platform/android.cmake
+--Make a /data/app/bluefin/opt/sandshark directory (sudo mkdir -p /data/app/bluefin/opt/sandshark)  This is where catkin will put all of the executables and libraries after they are built
+--change the owner and group of the /data/app/bluefin/opt/sandshark directory to your username (sudo chown <username>:<username> /data/app/bluefin/opt/sandshark)
+--change permissions of the /data/app/bluefin/opt/sandshark directory to 775 (sudo chmod 755 /data/app/bluefin/opt/sanddhark)
 
 -Building the code
 --cd to the ~/sandshark/vehicle/ros directory
