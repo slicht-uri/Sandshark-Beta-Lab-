@@ -1,0 +1,8 @@
+prefix=/home/adapt/rosalign/install_isolated
+
+Name: roslib
+Description: Description of roslib
+Version: 1.10.9
+Cflags: -I/home/adapt/rosalign/install_isolated/include
+Libs: -L/home/adapt/rosalign/install_isolated/lib -lroslib
+Requires: 

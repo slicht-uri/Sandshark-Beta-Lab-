@@ -1,0 +1,8 @@
+prefix=/home/adapt/rosalign/install_isolated
+
+Name: roswtf
+Description: Description of roswtf
+Version: 1.10.1
+Cflags: 
+Libs: -L/home/adapt/rosalign/install_isolated/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/adapt/rosalign/install_isolated
+
+Name: genmsg
+Description: Description of genmsg
+Version: 0.4.25
+Cflags: 
+Libs: -L/home/adapt/rosalign/install_isolated/lib 
+Requires: 
