@@ -38,6 +38,8 @@ if [ $# -gt 0 ]; then
    cd $CUR_DIR
    if [ "$1" = "adb" ]; then
      adb shell rm -r /data/app/bluefin/opt
+     adb shell rm -r /data/app/bluefin/bin
+     adb shell rm /data/app/bluefin/bin
      adb shell mkdir -p /data/app/bluefin/opt
      adb push /data/app/bluefin/opt/catkin_package.tgz /data/app/bluefin/opt
      adb shell rm -rf /data/app/bluefin/opt/sandshark 2> /dev/null
@@ -49,6 +51,8 @@ if [ $# -gt 0 ]; then
      adb push sysfiles/ip_address.txt /data/app/bluefin/bin/
      adb shell chmod 600 /data/ssh/authorized_keys
      adb push sysfiles/wpa_supplicant.conf /data/misc/wifi/
+     adb shell svc wifi enable
+
    else
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'rm /data/app/bluefin/opt'
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'rm -r /data/app/bluefin/bin'
@@ -63,8 +67,8 @@ if [ $# -gt 0 ]; then
     scp -i sysfiles/sandshark_operator.openssh sysfiles/ip_address.txt root@$1:/data/app/bluefin/bin
     ssh -i sysfiles/sandshark_operator.openssh root@$1 'chmod 600 /data/ssh/authorized_keys'
     scp -i sysfiles/sandshark_operator.openssh sysfiles/wpa_supplicant.conf root@$1:/data/misc/wifi
+    ssh -i sysfiles/sandshark_operator.openssh root@$1 'svc wifi enable'
    fi
 else
     echo "Not Deploying, no IP address passed"
 fi
-
