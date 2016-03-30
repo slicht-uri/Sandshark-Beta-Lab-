@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: mk
-Description: Description of mk
-Version: 1.10.9
-Cflags: 
-Libs: -L/home/adapt/rosalign/install_isolated/lib 
-Requires: 

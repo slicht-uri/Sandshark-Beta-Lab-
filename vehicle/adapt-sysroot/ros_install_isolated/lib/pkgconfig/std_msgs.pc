@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: std_msgs
-Description: Description of std_msgs
-Version: 0.5.8
-Cflags: -I/home/adapt/rosalign/install_isolated/include
-Libs: -L/home/adapt/rosalign/install_isolated/lib 
-Requires: message_runtime

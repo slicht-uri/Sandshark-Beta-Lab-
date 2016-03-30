@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: genlisp
-Description: Description of genlisp
-Version: 0.4.12
-Cflags: 
-Libs: -L/home/adapt/rosalign/install_isolated/lib 
-Requires: genmsg

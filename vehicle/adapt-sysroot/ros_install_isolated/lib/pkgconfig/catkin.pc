@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: catkin
-Description: Description of catkin
-Version: 0.5.85
-Cflags: 
-Libs: -L/home/adapt/rosalign/install_isolated/lib 
-Requires: 

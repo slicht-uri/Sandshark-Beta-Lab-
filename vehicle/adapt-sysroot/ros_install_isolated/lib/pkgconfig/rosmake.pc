@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: rosmake
-Description: Description of rosmake
-Version: 1.10.9
-Cflags: 
-Libs: -L/home/adapt/rosalign/install_isolated/lib 
-Requires: 

@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: message_filters
-Description: Description of message_filters
-Version: 1.10.1
-Cflags: -I/home/adapt/rosalign/install_isolated/include
-Libs: -L/home/adapt/rosalign/install_isolated/lib -lmessage_filters
-Requires: roscpp xmlrpcpp rosconsole

@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: rospack
-Description: Description of rospack
-Version: 2.1.23
-Cflags: -I/home/adapt/rosalign/install_isolated/include -I/home/adapt/ADAPT/titan-sysroot/usr/include
-Libs: -L/home/adapt/rosalign/install_isolated/lib -lrospack -ltinyxml -l:/usr/local/titan-sysroot/lib/libpython2.7.so /home/adapt/ADAPT/titan-sysroot/lib/libboost_filesystem.a /home/adapt/ADAPT/titan-sysroot/lib/libboost_program_options.a /home/adapt/ADAPT/titan-sysroot/lib/libboost_system.a
-Requires: 

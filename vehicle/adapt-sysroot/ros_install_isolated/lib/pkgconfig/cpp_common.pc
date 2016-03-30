@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: cpp_common
-Description: Description of cpp_common
-Version: 0.4.3
-Cflags: -I/home/adapt/rosalign/install_isolated/include
-Libs: -L/home/adapt/rosalign/install_isolated/lib -lcpp_common -l:/home/adapt/rosalign/install_isolated/lib/libconsole_bridge.so
-Requires: 

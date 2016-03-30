@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: roscpp_traits
-Description: Description of roscpp_traits
-Version: 0.4.3
-Cflags: -I/home/adapt/rosalign/install_isolated/include
-Libs: -L/home/adapt/rosalign/install_isolated/lib 
-Requires: cpp_common rostime

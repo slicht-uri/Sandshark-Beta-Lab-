@@ -1,8 +1,0 @@
-prefix=/home/adapt/rosalign/install_isolated
-
-Name: roslisp
-Description: Description of roslisp
-Version: 1.9.15
-Cflags: 
-Libs: -L/home/adapt/rosalign/install_isolated/lib 
-Requires: 
