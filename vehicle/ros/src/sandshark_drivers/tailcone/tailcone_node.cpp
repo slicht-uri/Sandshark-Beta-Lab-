@@ -4,6 +4,7 @@
 #include <sandshark_msgs/TailconeState.h>
 #include <sandshark_msgs/TailconePowerUsage.h>
 #include <sandshark_msgs/TailconeRaw.h>
+#include <sandshark_msgs/TailconeVersion.h>
 #include <sandshark_msgs/ObjectiveControlStatus.h>
 #include <ros/ros.h>
 
@@ -68,6 +69,7 @@
 //Other Command/Response Headers
 #define TC_ALLOFF_HEADER        "AO"
 #define TC_HOME_HEADER          "HM"
+#define TC_VER_HEADER           "VER"
 
 #define TC_COMMAND_HEADER       "#"
 #define TC_REPLY_HEADER         "$"
@@ -146,7 +148,9 @@ class TailconeDriver: public DriverBase {
     /*********************ROS-specific member variables***********************/
     //tailcone dynamics publication
     ros::Publisher _actualStatePub;
+    ros::Publisher _versionPub;
     sandshark_msgs::TailconeState _actualStateMsg;
+    sandshark_msgs::TailconeVersion _versionMsg;
 
     ros::Subscriber _commandedStateSub;
     sandshark_msgs::TailconeState _commandedStateMsg;
@@ -167,6 +171,7 @@ class TailconeDriver: public DriverBase {
     float _currentRudder;
     int _currentRPM;
 
+    bool _bluefinFrame;
     TailconeState _tailconeState;
 
     ros::Time _lastCmdTime;
@@ -312,6 +317,8 @@ class TailconeDriver: public DriverBase {
      */
     bool streConvo();
 
+    bool verConvo();
+
     /**
      * Reads and returns the current state status of the specified channel
      *  from the device.
@@ -424,7 +431,7 @@ void TailconeDriver::msgCmdCallback(const sandshark_msgs::TailconeState::ConstPt
   //make the local copies of desired match the ones we just received
   _desired_rpm = msg->thruster;
   _desiredRudder = msg->rudder;
-  _desiredElevator = -1 * msg->elevator;
+  _desiredElevator = (_bluefinFrame ? 1 : -1 ) * msg->elevator;
 
   _lastCmdTime = ros::Time::now();
   _lastCmdValid = true;
@@ -438,6 +445,7 @@ void TailconeDriver::startupInitCallback() {
 
   //for publishing the thruster rpm, rudder angle, and elevator angle
   _actualStatePub = _publicNode->advertise<sandshark_msgs::TailconeState>("currentpos", 10);
+  _versionPub = _publicNode->advertise<sandshark_msgs::TailconeVersion>("version", 10, true);
 
   //callback for receipt of desired thruster rpm and actuator angles message from DC
   _privateNode->param("command_topic", _commandTopic, std::string("dynamiccontrol"));
@@ -591,6 +599,7 @@ bool TailconeDriver::doInitialize() {
   }
   //******************Serial Port Should be open/ready ********************//
   //basically a BIT
+  _bluefinFrame = false; //verConvo will set this
   return homeAll();
   //return true;
 }
@@ -632,6 +641,11 @@ bool TailconeDriver::homeAll() {
   if (!homeChannelConvo(TC_RUDDER)) {
     setErrorMessage("Unable to home rudder");
     ROS_ERROR("Unable to home elevator");
+    return false;
+  }
+  if( !verConvo() ) {
+    setErrorMessage("Cannot get TC FW Version");
+    ROS_ERROR("Cannot get TC FW Version");
     return false;
   }
   return true;
@@ -802,6 +816,43 @@ bool TailconeDriver::homeChannelConvo(std::string channel) {
 
 }
 
+bool TailconeDriver::verConvo() {
+  //string to hold the reply
+  std::string rxBody = "";
+  if( !converse(TC_VER_HEADER, std::string(""), rxBody, _message_timeout ) ) {
+    return false;
+  }
+  boost::algorithm::erase_all(rxBody, "\n");
+  ROS_INFO("RXBODY VER %s", rxBody.c_str());
+  std::vector<std::string> vals;
+
+  boost::split(vals, rxBody, boost::is_any_of(" "));
+
+  /*for( std::vector<std::string>::iterator iter = vals.begin(); iter != vals.end(); ++iter ) {
+    ROS_INFO( "Split Vals = %s", (*iter).c_str() );
+  }*/
+
+  if( vals.size() >= 6 ) {
+    _versionMsg.PartNumber = vals[1];
+    _versionMsg.HardwareRevision = vals[5];
+    _versionMsg.SoftwareRevision = vals[3];
+    std::vector<std::string> srvals;
+    boost::split(srvals, vals[3], boost::is_any_of("."));
+    _versionMsg.bluefinTailFrame = false;
+    for( std::vector<std::string>::iterator iter = srvals.begin(); iter != srvals.end(); ++iter ) {
+        ROS_INFO( "Split Vals = %s", (*iter).c_str() );
+    }
+    if( !srvals.empty() && atoi( srvals[0].c_str() ) >= 1 ) {
+        _versionMsg.bluefinTailFrame = true;
+    } 
+    _bluefinFrame = _versionMsg.bluefinTailFrame;
+    _versionPub.publish( _versionMsg );
+  } else { 
+    return false;
+  }
+  return true;
+}
+
 bool TailconeDriver::streConvo() {
   //form the command string
   char txString[16];
@@ -858,6 +909,9 @@ bool TailconeDriver::streConvo() {
     _actualStateMsg.thruster = trpm;
     _actualStateMsg.rudder = ra;
     _actualStateMsg.elevator = ea;
+    _actualStateMsg.commanded_rudder = _desiredRudder;
+    _actualStateMsg.commanded_elevator = _desiredElevator;
+    _actualStateMsg.commanded_thruster = _desired_rpm;
   } catch (...) {
     //we don't really care here, we'll know when we query status, but
     //even so lets make a deviceTimeoutWarning

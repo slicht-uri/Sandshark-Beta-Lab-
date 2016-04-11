@@ -57,6 +57,7 @@ StopMissionLog.msg
 TailconePowerUsage.msg
 TailconeRaw.msg
 TailconeState.msg
+TailconeVersion.msg
 Velocities.msg
 adapt_payload_data.msg
 )
