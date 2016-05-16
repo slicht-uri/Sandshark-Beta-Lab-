@@ -456,7 +456,7 @@ void TailconeDriver::startupInitCallback() {
   _privateNode->param("BAUD_RATE", _BAUD_RATE, (int) 115200);
   _privateNode->param("SERIAL_PORT", _SERIAL_PORT, std::string("/dev/ttyMAX1"));
 
-  _privateNode->param("enableGPIOPin", _enableGPIOPin, (int) 421);
+  _privateNode->param("enableGPIOPin", _enableGPIOPin, (int) 420);
   _privateNode->param("resetMotorGPIOPin", _resetMotorGPIOPin, (int) 409);
 
   //read in the tailcone address

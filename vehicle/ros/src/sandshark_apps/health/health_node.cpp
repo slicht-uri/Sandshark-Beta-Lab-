@@ -420,9 +420,9 @@ void HealthApp::startupInitCallback() {
   ConditionManager::instance()->addCondition(_publicNode, leakCondition);
   ConditionManager::instance()->linkConditionToAction(leakCondition, ConditionManager::instance()->getAbortAction());
 
-  Condition *navLossCondition = new NavLossCondition("nav_loss");
-  ConditionManager::instance()->addCondition(_publicNode, navLossCondition);
-  ConditionManager::instance()->linkConditionToAction(navLossCondition, ConditionManager::instance()->getAbortAction());
+//  Condition *navLossCondition = new NavLossCondition("nav_loss");
+//  ConditionManager::instance()->addCondition(_publicNode, navLossCondition);
+//  ConditionManager::instance()->linkConditionToAction(navLossCondition, ConditionManager::instance()->getAbortAction());
 
   Condition *ethCondition = new EthernetCondition("exists");
   ConditionManager::instance()->addCondition(_publicNode, ethCondition);

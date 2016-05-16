@@ -17,9 +17,9 @@ echo "out" > /sys/class/gpio/gpio407/direction
 echo 1 > /sys/class/gpio/gpio407/value
 
 #Turn on payload power
-echo 420 > /sys/class/gpio/export
-echo "out" > /sys/class/gpio/gpio420/direction
-echo 1 > /sys/class/gpio/gpio420/value
+echo 421 > /sys/class/gpio/export
+echo "out" > /sys/class/gpio/gpio421/direction
+echo 1 > /sys/class/gpio/gpio421/value
 
 modprobe smsc75xx
 sleep 2
