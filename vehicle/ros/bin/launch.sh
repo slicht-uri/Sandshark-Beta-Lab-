@@ -44,7 +44,7 @@ done
 
 . /etc/mkshrc
 
-export ROS_IP=$wipa
+export ROS_IP=10.0.7.65
 
 ulimit -c unlimited
 echo "/data/app/core-%e.%p" > /proc/sys/kernel/core_pattern

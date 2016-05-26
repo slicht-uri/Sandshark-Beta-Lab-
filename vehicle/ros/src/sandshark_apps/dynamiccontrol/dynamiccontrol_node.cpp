@@ -309,6 +309,10 @@ bool DynamicControlApp::doRun() {
     //here we are putting our pitch pid output radians into the elevator PID (in firmware)
     //we might need a conversion factor like the depth case, although it is less likely
   case (VM_ELEVATOR):
+    if (_vertical_mode == VM_ELEVATOR) {
+      //convert to radians if the pitch command is direct, otherwise it will already be radians
+      vertCmd = ( _verticalDesired / 180.0 ) * M_PI;
+    }
     // convert output from radians to degrees and send to the elevator
     _tailCmdMsg.elevator = (vertCmd / M_PI) * 180.0;
     break;
@@ -322,14 +326,6 @@ bool DynamicControlApp::doRun() {
     break;
   case (HM_HEADING):
     horizCmd = _headingPID->process(horizCmd, (_bearingMeasured / 180.0 * M_PI), dt.toSec());
-
-  //make sure heading is the right direction
-  while (horizCmd < -M_PI) {
-    horizCmd += 2*M_PI;
-  }
-  while (horizCmd > M_PI) {
-    horizCmd -= 2*M_PI;
-  }
   case (HM_RUDDER):
     //Output rudder in degrees
     _tailCmdMsg.rudder = (horizCmd / M_PI) * 180.0;
@@ -346,10 +342,14 @@ bool DynamicControlApp::doRun() {
   }
 
   _tailCmdMsg.thruster = _rpmDesired;
-  //Flip for reverse motion
+  //Flip for reverse motion unless its a direct command
   if (_rpmDesired < 0.0) {
-    _tailCmdMsg.rudder *= -1.0;
-    _tailCmdMsg.elevator *= -1.0;
+    if( _horizontal_mode != HM_RUDDER ) {
+      _tailCmdMsg.rudder *= -1.0;
+    }
+    if( _vertical_mode != VM_ELEVATOR ) {
+      _tailCmdMsg.elevator *= -1.0;
+    }
   }
   _tailCmdPub.publish(_tailCmdMsg);
 

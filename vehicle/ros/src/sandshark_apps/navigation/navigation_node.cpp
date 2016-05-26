@@ -486,7 +486,7 @@ double NavigationApp::calculateDepth(double latitude, double pressure) {
   depth_in_meters = C / gr; // meters
   //ROS_ERROR("PRESSURE IS %f DEPTH IS %f",pressure,depth_in_meters);
 
-  return pressure /-10000; //depth_in_meters;
+  return depth_in_meters;
 }
 
 void NavigationApp::handleSleep() {

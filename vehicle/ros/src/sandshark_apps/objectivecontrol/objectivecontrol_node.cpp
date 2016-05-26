@@ -184,6 +184,8 @@ class ObjectiveControlApp: public TaskBase {
     void sendReadyLED();
     void sendRunningLED();
     void sendAbortLED();
+    void sendNavLED();
+    void sendNoNavLED();
 
     ros::Rate * _rate;
   protected:
@@ -365,6 +367,24 @@ void ObjectiveControlApp::msgObjectiveCommandCallback(const sandshark_msgs::Obje
 
   //try to get the vehicle into a running state
   _missionAborted = false;
+}
+
+void ObjectiveControlApp::sendNavLED() {
+  sandshark_msgs::LEDCommand msg;
+
+  if (_amberStatus != sandshark_msgs::LEDCommand::COMMAND_ON) {
+    msg.command = sandshark_msgs::LEDCommand::COMMAND_ON;
+    _amberLEDPub.publish(msg);
+  }
+}
+
+void ObjectiveControlApp::sendNoNavLED() {
+  sandshark_msgs::LEDCommand msg;
+
+  if (_amberStatus != sandshark_msgs::LEDCommand::COMMAND_OFF) {
+    msg.command = sandshark_msgs::LEDCommand::COMMAND_OFF;
+    _amberLEDPub.publish(msg);
+  }
 }
 
 void ObjectiveControlApp::sendReadyLED() {
@@ -626,6 +646,9 @@ bool ObjectiveControlApp::doRun() {
   _objStatMsg.have_nav = false;
   if (_have_nav && ((now - _lastMeasuredTime) < ros::Duration(1.0))) {
     _objStatMsg.have_nav = true;
+    sendNavLED();
+  } else {
+    sendNoNavLED();
   }
   _objStatMsg.current_waypoint = _current_point;
   _objStatMsg.is_aborted = _missionAborted;

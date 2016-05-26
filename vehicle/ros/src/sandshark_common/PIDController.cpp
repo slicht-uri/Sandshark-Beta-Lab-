@@ -40,12 +40,22 @@ double PIDController::process(double desired, double measured, double dt, bool h
 
   double error = desired - measured;
   if (_wrapAngles) {
-    while (error > M_PI) {
+/*    while (error > M_PI) {
       error -= 2 * M_PI;
     }
     while (error < -M_PI) {
       error += 2 * M_PI;
-    }
+    }*/
+    double cosdesired = cos( desired );
+    double sindesired = sin( desired );
+    double cosmeasured = cos( measured );
+    double sinmeasured = sin( measured );
+    double magdesired = sqrt( cosdesired * cosdesired + sindesired * sindesired );
+    double magmeasured = sqrt( cosmeasured * cosmeasured + sinmeasured * sinmeasured );
+    double dotprod = cosdesired * cosmeasured + sindesired * sinmeasured;
+    double crossprod = cosmeasured * sindesired - cosdesired * sinmeasured;
+
+    error = copysign( acos( dotprod/( magmeasured * magdesired ) ), crossprod );
   }
 
   double rate = measuredRate;

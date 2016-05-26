@@ -11,6 +11,8 @@
 #define MAVLINK_ALIGNED_FIELDS false
 #include <mavlink.h>
 
+#define BLUEFIN_DC_TEST_COMMAND 60
+
 using namespace std;
 namespace bluefin {
 namespace sandshark {
@@ -341,6 +343,70 @@ bool ActionSelectorApp::doRun() {
             _objCmdMsg.pop_reason = reason;
             _objCmdPub.publish(_objCmdMsg);
           }
+          break;
+        case( BLUEFIN_DC_TEST_COMMAND ):
+          if (((now.toSec() - _objCommand.start_time) > _objCommand.param6)) {
+            //Need to pop this objective
+            _objCmdMsg.start_mission = false;
+            _objCmdMsg.stop_mission = false;
+            _objCmdMsg.pop_objective = true;
+            _objCmdMsg.push_objective = false;
+            char reason[512];
+            snprintf(&reason[0], sizeof(reason), "Popping Objective, duration %f is greater than %f",
+                (now.toSec() - _objCommand.start_time), _objCommand.param6);
+            reason[sizeof(reason) - 1] = '\0';
+            _objCmdMsg.pop_command_id = _objCommand.command_id;
+            _objCmdMsg.pop_commands_sub_id = _objCommand.command_sub_id;
+            _objCmdMsg.pop_reason = reason;
+            _objCmdPub.publish(_objCmdMsg);
+            break;
+          }
+          if( _currentNavState.depth > _objCommand.param7 ) {
+            //Need to pop this objective
+            _objCmdMsg.start_mission = false;
+            _objCmdMsg.stop_mission = false;
+            _objCmdMsg.pop_objective = true;
+            _objCmdMsg.push_objective = false;
+            char reason[512];
+            snprintf(&reason[0], sizeof(reason), "Popping Objective, depth %f is greater than %f",
+                _currentNavState.depth, _objCommand.param7);
+            reason[sizeof(reason) - 1] = '\0';
+            _objCmdMsg.pop_command_id = _objCommand.command_id;
+            _objCmdMsg.pop_commands_sub_id = _objCommand.command_sub_id;
+            _objCmdMsg.pop_reason = reason;
+            _objCmdPub.publish(_objCmdMsg);
+            break;
+          }
+          _dcCmdMsg.vertical_mode = VM_ELEVATOR;
+          if( _objCommand.param3 > 0.5 ) {
+            _dcCmdMsg.vertical_mode = VM_PITCH;
+          }
+          if( _objCommand.param3 > 1.5 ) {
+            _dcCmdMsg.vertical_mode = VM_DEPTH;
+          }
+          
+          _dcCmdMsg.vertical_desired = _objCommand.param4;
+
+          _dcCmdMsg.horizontal_mode = ( fabs( _objCommand.param1 ) < 0.1 ? HM_RUDDER : HM_HEADING );
+          _dcCmdMsg.horizontal_desired = _objCommand.param2;
+
+          _dcCmdMsg.speed_desired = ( _objCommand.param5 > _maxRPM ? _maxRPM : _objCommand.param5 );
+          _dcCmdPub.publish(_dcCmdMsg);
+
+          break;
+        default:
+          ROS_ERROR("Sending pop - unknown cmd ID %d", _objCommand.command );
+          _objCmdMsg.start_mission = false;
+          _objCmdMsg.stop_mission = false;
+          _objCmdMsg.pop_objective = true;
+          _objCmdMsg.push_objective = false;
+          char reason[512];
+          snprintf(&reason[0], sizeof(reason), "Popping Objective, Unknown Command ID (%d)!", _objCommand.command );
+          reason[sizeof(reason) - 1] = '\0';
+          _objCmdMsg.pop_command_id = _objCommand.command_id;
+          _objCmdMsg.pop_commands_sub_id = _objCommand.command_sub_id;
+          _objCmdMsg.pop_reason = reason;
+          _objCmdPub.publish(_objCmdMsg);
           break;
         }
       }

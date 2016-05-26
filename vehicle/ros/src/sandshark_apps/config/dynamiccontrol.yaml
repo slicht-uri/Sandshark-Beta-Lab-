@@ -1,5 +1,24 @@
-{correctTailconePerRoll: true, depthclipCmd: true, depthcmdMax: 0.5236, depthcmdMin: -0.5236,
- depthpgain: 0.3, depthigain: 0.2, depthdgain: 0.03, depthimax: 0.1,
- headingpgain: 0.5, headingigain: 0.01, headingdgain: 0.0,  headingimax: 0.2,
-headingwrapAngles: true, pitchigain: 0.0, pitchimax: 0.5, pitchpgain: 0.35,
-pitchwrapAngles: true, rpm_to_speed: 0.0008}
+correctTailconePerRoll: false
+depthclipCmd: true
+depthcmdMax: 0.52359
+depthcmdMin: -0.52359
+depthdgain: 0.0
+depthigain: 0.15000000596046448
+depthimax: 0.10000000000000001
+depthpgain: 0.34999999403953552
+headingdgain: 0.0
+headingigain: 0.10000000149011612
+headingimax: 0.20000000000000001
+headingpgain: 1.2000000476837158
+headingwrapAngles: true
+headingclipCmd: true
+headingcmdMax: 0.52359
+headingcmdMin: -0.52359
+pitchigain: 0.10000000149011612
+pitchimax: 0.5
+pitchpgain: 1.5
+pitchwrapAngles: true
+rpm_to_speed: 0.00080000000000000004
+rpm_to_speed_map: {'-2500': '-3.000', '-900': '-1.139', '0': '0.000', '1200': '1.553',
+  '1500': '1.967', '2000': '2.657', '2500': '3.000', '300': '0.311', '600': '0.725',
+  '900': '1.139'}
