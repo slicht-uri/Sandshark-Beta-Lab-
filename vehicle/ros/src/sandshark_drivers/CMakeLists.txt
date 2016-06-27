@@ -20,6 +20,7 @@ add_executable(sandshark_gps_node gps/gps_node.cpp)
 add_executable(sandshark_led_node led/led_node.cpp led/SX1509.cpp)
 add_executable(sandshark_mavlink_node mavlink/mavlink_node.cpp mavlink/ellipsoidFit.cpp)
 add_executable(sandshark_tailcone_node tailcone/tailcone_node.cpp)
+add_executable(sandshark_env_depth_node envdepth/env_depth_node.cpp envdepth/MS89BSD.cpp envdepth/MS8607BA01.cpp )
 
 target_link_libraries(sandshark_altimeter_node ${catkin_LIBRARIES})
 target_link_libraries(sandshark_currentsense_node ${catkin_LIBRARIES})
@@ -32,22 +33,25 @@ target_link_libraries(sandshark_gps_node ${catkin_LIBRARIES})
 target_link_libraries(sandshark_led_node ${catkin_LIBRARIES})
 target_link_libraries(sandshark_mavlink_node ${catkin_LIBRARIES})
 target_link_libraries(sandshark_tailcone_node ${catkin_LIBRARIES})
+target_link_libraries(sandshark_env_depth_node ${catkin_LIBRARIES})
 
 add_dependencies(sandshark_altimeter_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(sandshark_currentsense_node ${catkin_EXPORTED_TARGETS})
-add_dependencies(sandshark_depth_node MS89BSD MS5803 ${catkin_EXPORTED_TARGETS})
+add_dependencies(sandshark_depth_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(sandshark_environmental_node ${catkin_EXPORTED_TARGETS})
-add_dependencies(sandshark_frontseat_node fnmea bfMessage bpMessage ${catkin_EXPORTED_TARGETS})
+add_dependencies(sandshark_frontseat_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(sandshark_gasgauge_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(sandshark_gps_node ${catkin_EXPORTED_TARGETS})
 #add_dependencies(sandshark_pixie_gps_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(sandshark_led_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(sandshark_mavlink_node ${catkin_EXPORTED_TARGETS})
 add_dependencies(sandshark_tailcone_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(sandshark_env_depth_node ${catkin_EXPORTED_TARGETS})
+
 
  install(TARGETS sandshark_altimeter_node sandshark_currentsense_node sandshark_depth_node sandshark_environmental_node sandshark_frontseat_node sandshark_gasgauge_node sandshark_gps_node 
 #sandshark_pixie_gps_node 
-sandshark_led_node sandshark_mavlink_node sandshark_tailcone_node
+sandshark_led_node sandshark_mavlink_node sandshark_tailcone_node sandshark_env_depth_node
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 

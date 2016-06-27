@@ -56,6 +56,11 @@ namespace bluefin {
   }
  
   bool DriverBase::gpioInit(int pin, bool input) {
+      if( pin < 0 ) {
+        ROS_INFO( "GPIO Init pin is negative, init skipped." );
+        return true;
+      }
+      
       //Write _pin to /sys/class/gpio/export to have sys create
       //a GPIO interface for our use
       char buf[40];
@@ -98,6 +103,10 @@ namespace bluefin {
   }
  
   bool DriverBase::gpioRelease(int pin) {
+      if( pin < 0 ) {
+        return true;
+      }
+
       //Unexport the gpio to free it up
       int setupFd = open( "/sys/class/gpio/unexport", O_WRONLY );
       if( setupFd != -1 ) {
@@ -119,6 +128,10 @@ namespace bluefin {
   }
  
   bool DriverBase::gpioWrite( int pin, uint8_t data ) {
+      if( pin < 0 ) {
+        return true;
+      }
+
       static char buf[64];    
       //Write to the direction file to make our GPIO an input or output
       sprintf( buf, "/sys/class/gpio/gpio%d/value", pin );
@@ -141,6 +154,11 @@ namespace bluefin {
   }
  
   bool DriverBase::gpioReadOneChar( int pin, uint8_t & data ) {
+      if( pin < 0 ) {
+        data = 0;
+        return true;
+      }
+
       static char buf[64];    
       //Write to the direction file to make our GPIO an input or output
       sprintf( buf, "/sys/class/gpio/gpio%d/value", pin );
