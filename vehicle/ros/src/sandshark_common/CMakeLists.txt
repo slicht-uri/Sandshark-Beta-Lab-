@@ -25,9 +25,7 @@ add_library(sandshark_common
 
 IF(IN_SIM)
 target_link_libraries(sandshark_common
-  #gnustl_shared
-  sqlite3
-  /usr/lib/libproj.a
+  proj
   ${catkin_LIBRARIES}
 )
 ELSE()

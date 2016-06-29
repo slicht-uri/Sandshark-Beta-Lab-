@@ -169,11 +169,11 @@ bool MS8607BA01::Read( int fd, float* pressure, float* temperature, float *humid
   float OFF = _c2 * ( 2 << 17 ) + ( _c4 * dT )/( 2 << 6 );
   float SENS = _c1 * ( 2 << 16 ) + ( _c3 * dT )/( 2 << 7 );
   
-  float T2 = ( 5.0 * dT * dT )/( 2 << 38 );
+  float T2 = ( 5.0 * dT * dT )/( pow( 2, 38 ) );
   float OFF2 = 0.0;
   float SENS2 = 0.0;
   if( TEMP < 20.0 ) {
-    T2 = ( 3.0 * dT * dT )/( 2 << 33 );
+    T2 = ( 3.0 * dT * dT )/( pow( 2, 33 ) );
     OFF2 = 61.0 * ( TEMP - 20.0 ) * ( TEMP - 20.0 )/( 2 << 4 );
     SENS2 = 29.0 * ( TEMP - 20.0 ) * ( TEMP - 20.0 )/( 2 << 4 );
     if( TEMP < -15.0 ) {
