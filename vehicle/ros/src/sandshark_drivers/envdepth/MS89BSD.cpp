@@ -25,6 +25,8 @@ bool MS89BSD::Begin( int fd ) {
     printf("Failed to begin communications.\n");
     return false;
   }
+ 
+  usleep( 10000 );
   return true;
 }
 
@@ -139,6 +141,7 @@ int MS89BSD::ReadAdc( int fd ) {
     printf("Failed to read ADC\n");
     return -1;
   }
+  usleep(10000);
   //read value from sensor
   if( read( fd, _rxbuf, 3 ) != 3 ) {
     printf("Failed to read ADC\n");

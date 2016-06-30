@@ -1,4 +1,6 @@
 #include "MS8607BA01.h"
+#include <string.h>
+
 MS8607BA01::MS8607BA01( int addr ) :
     _addr(addr) {
     _humidaddr = 0x40;
@@ -21,6 +23,8 @@ bool MS8607BA01::Begin( int fd, bool humid ) {
     printf("Failed to begin communications.\n");
     return false;
   }
+
+  usleep( 10000 );
   return true;
 }
 
@@ -31,7 +35,7 @@ bool MS8607BA01::ReadProm( int fd ) {
   }
   usleep(1000);
 
-  printf("PROM: ");
+  printf("envPROM: ");
 
   for( int i = 0; i < 6; i++ ) {
     int j = i;
@@ -59,7 +63,7 @@ bool MS8607BA01::ReadProm( int fd ) {
   _c5 = _prom[4];
   _c6 = _prom[5];
 
-  printf("c1: %d, c2: %d, c3: %d, c4: %d, c5: %d, c6: %d.\n", _c1, _c2, _c3, _c4, _c5, _c6);
+  printf("ENV c1: %d, c2: %d, c3: %d, c4: %d, c5: %d, c6: %d.\n", _c1, _c2, _c3, _c4, _c5, _c6);
 
   return true;
 }
@@ -68,19 +72,21 @@ int MS8607BA01::ReadAdc( int fd, bool humid ) {
   _txbuf[0] = ( humid ? 0xE5 : MS8607BA01_ADCread );
   int adcvalue;
   //Initialize communications with sensor
-  Begin( fd );
+  Begin( fd, humid );
   //write ADCread command to sensor
   if( write( fd, _txbuf, 1 ) != 1 ) {
-    printf("Failed to read ADC\n");
+    printf("ENV Failed to read ADC is %s\n", (humid ? "humid" : "PT" ) );
     return -1;
   }
   int retbytes = 3;
+  usleep(10000);
+
   if( humid ) { 
     retbytes = 2;
   }
   //read value from sensor
   if( read( fd, _rxbuf, retbytes ) != retbytes ) {
-    printf("Failed to read ADC\n");
+    printf("ENV2 Failed to read ADC is %s -- errno %d:%s\n", (humid ? "humid" : "PT" ), errno, strerror( errno )  );
     return -1;
   }
   if( humid ) {
@@ -111,7 +117,7 @@ bool MS8607BA01::ConvertD2( int fd ) {
   Begin( fd );
   //write ConvertD2 command to sensor
   if( write( fd, _txbuf, 1) != 1 ) {
-    printf("Failed to write convertD2 command\n");
+    printf("ENV Failed to write convertD2 command\n");
     return false;
   }
   return true;
@@ -121,9 +127,9 @@ bool MS8607BA01::ConvertRH( int fd ) {
   _txbuf[0] = 0xFE;
   //Initialize communications with sensor
   Begin( fd, true );
-    
+
   if( write( fd, _txbuf, 1) != 1 ) {
-    printf("Failed to write convertD2 command\n");
+    printf("ENV Failed to write convertD2 command\n");
     return false;
   }
   
@@ -141,10 +147,6 @@ bool MS8607BA01::Read( int fd, float* pressure, float* temperature, float *humid
   //Read ADC to get pressure value
   int raw_pressure = ReadAdc( fd );
 
-  float Pmax = 30.0; //Max Pressure is 30 Bar Absolute
-
-  float Pmin = 0.0; // Min Pressure is 0 Bar Absolute
-
   //Send command to collect temperature data
   if( !ConvertD2( fd ) ) {
     return false;
@@ -154,8 +156,7 @@ bool MS8607BA01::Read( int fd, float* pressure, float* temperature, float *humid
   usleep(10000);
   //Read ADC to get temperature data
   int raw_temperature = ReadAdc( fd );
-  
-  
+ 
   if( !ConvertRH( fd ) ){ 
     return false;
   }
@@ -163,32 +164,34 @@ bool MS8607BA01::Read( int fd, float* pressure, float* temperature, float *humid
   usleep(10000);
 
   int rh = ReadAdc( fd, true );
-  
-  float dT = (float)raw_temperature - _c5 * ( 2 << 8 );
-  float TEMP = 20.0 + dT * _c6/( 2 << 23 );
-  float OFF = _c2 * ( 2 << 17 ) + ( _c4 * dT )/( 2 << 6 );
-  float SENS = _c1 * ( 2 << 16 ) + ( _c3 * dT )/( 2 << 7 );
-  
-  float T2 = ( 5.0 * dT * dT )/( pow( 2, 38 ) );
+ 
+//  printf( "RawT = %d, RawP = %d RH = %d\n", raw_temperature, raw_pressure, rh );
+  float dT = (float)raw_temperature - (((float)_c5) * ( 1 << 8 ));
+  float TEMP = 2000.0 + dT * ((float)_c6)/( 1 << 23 );
+  float OFF = (float)_c2 * ( 1 << 17 ) + ( (float)_c4 * dT )/( 1 << 6 );
+  float SENS = (float)_c1 * ( 1 << 16 ) + ( (float)_c3 * dT )/( 1 << 7 );
+//  printf( "dT %f TEMP %f, OFF %f, SENS %f\n", dT, TEMP, OFF, SENS );
+  float T2 = 0.0;
   float OFF2 = 0.0;
   float SENS2 = 0.0;
   if( TEMP < 20.0 ) {
-    T2 = ( 3.0 * dT * dT )/( pow( 2, 33 ) );
-    OFF2 = 61.0 * ( TEMP - 20.0 ) * ( TEMP - 20.0 )/( 2 << 4 );
-    SENS2 = 29.0 * ( TEMP - 20.0 ) * ( TEMP - 20.0 )/( 2 << 4 );
-    if( TEMP < -15.0 ) {
-      OFF2 += 17.0 * ( TEMP + 15.0 ) * ( TEMP + 15.0 );
-      SENS2 += 9.0 * ( TEMP + 15.0 ) * ( TEMP + 15.0 );
+    T2 = ( dT * dT )/( pow( 2, 31 ) );
+    OFF2 = 5.0 * ( TEMP - 2000.0 ) * ( TEMP - 2000.0 )/( 2.0 );
+    SENS2 = OFF2/( 2.0 );
+    if( TEMP < -1500.0 ) {
+      OFF2 += 7.0 * ( TEMP + 1500.0 ) * ( TEMP + 1500.0 );
+      SENS2 += 11.0 * ( TEMP + 1500.0 ) * ( TEMP + 1500.0 )/2;
     } 
   }
-  
+//  printf( "T2 %f, OFF2 %f SENS2 %f\n", T2, OFF2, SENS2 );
+
   TEMP -= T2;
   OFF -= OFF2;
   SENS -= SENS2;
   
-  *temperature = TEMP;
-  *pressure = ( raw_pressure * ( SENS/(2 << 21) ) - OFF )/( 2 << 15 );
-  *humidity = -6.0 + 125.0 * ( rh/ ( 2 << 16 ) );
+  *temperature = TEMP/100.0;
+  *pressure = ( raw_pressure * ( SENS/(1 << 21) ) - OFF )/( 1 << 15 );
+  *humidity = ( -6.0 + 125.0 * ( ((float)rh)/ ( 1 << 16 ) ) );
 
   return true;
 }

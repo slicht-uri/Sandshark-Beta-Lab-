@@ -1,4 +1,5 @@
 #include "MS89BSD.h"
+#include "MS8607BA01.h"
 
 #include <ros/ros.h>
 #include <sandshark_msgs/Depth.h>
@@ -14,7 +15,8 @@ namespace sandshark {
 class EnvDepthDriver: public DriverBase {
   private:
     MS89BSD *_depthI2C;
-    
+    MS8607BA01 *_envI2C;
+
     int _i2cfd;
 
     ros::Publisher _depthPub;
@@ -40,7 +42,7 @@ class EnvDepthDriver: public DriverBase {
     bool doRun();
   public:
     EnvDepthDriver() :
-        DriverBase("EnvDepthDriver", "envdepth"), _depthI2C( NULL) {
+        DriverBase("EnvDepthDriver", "envdepth"), _depthI2C( NULL ), _envI2C( NULL ) {
     }
 
     void handleSleep();
@@ -66,7 +68,7 @@ void EnvDepthDriver::startupInitCallback() {
     ROS_ERROR("GPIO Init Failed! Continuing since it may already exist");
   }
 
-  _rate = new ros::Rate(10);
+  _rate = new ros::Rate(0.5);
 }
 
 void EnvDepthDriver::cleanup() {
@@ -76,6 +78,11 @@ void EnvDepthDriver::cleanup() {
   if( _depthI2C ) {
     delete _depthI2C;
     _depthI2C = 0;
+  }
+
+  if( _envI2C ) {
+    delete _envI2C;
+    _envI2C = 0;
   }
 }
 
@@ -101,7 +108,8 @@ bool EnvDepthDriver::doInitialize() {
     }
   }
   
-  return true;
+  _envI2C = new MS8607BA01( 0x76 );
+  return _envI2C->init( _i2cfd );
 }
 
 bool EnvDepthDriver::doRun() {
@@ -116,6 +124,17 @@ bool EnvDepthDriver::doRun() {
     _depthMsg.temperature = temperature;
     _depthPub.publish(_depthMsg);
   }
+
+  float pressure, temperature, humidity;
+  if( !_envI2C->Read( _i2cfd, &pressure, &temperature, &humidity ) ) {
+    return false;
+  }
+
+  _envMsg.pressure = pressure; //XXX units??
+  _envMsg.temperature = temperature;
+  _envMsg.humidity = humidity;
+
+  _envPub.publish( _envMsg );
 
   return true;
 }
