@@ -494,7 +494,9 @@ void FrontSeatDriver::handleRMB(std::string inMessage) {
   if (rmb.parse(inMessage)) {
     sendACKIfNeeded(rmb.getHeader(), rmb.getTime(), -1, 2, "Successfully processed RMB message");
     //fill out a dc message with message info and fill it out
-    _dcCmdMsg.vertical_mode = rmb.getVerticalMode();
+    //This is dangerous, and commented out for now
+    //ACK still goes out, but vehicle will not move
+/*    _dcCmdMsg.vertical_mode = rmb.getVerticalMode();
     _dcCmdMsg.vertical_desired = rmb.getVertical();
     _dcCmdMsg.horizontal_mode = rmb.getHorizontalMode();
     _dcCmdMsg.horizontal_desired = rmb.getHorizontal();
@@ -504,7 +506,7 @@ void FrontSeatDriver::handleRMB(std::string inMessage) {
     } else {
       _dcCmdMsg.speed_desired = rmb.getTranslational(); //only can do rpm
     }
-    _dcCmdPub.publish(_dcCmdMsg);
+    _dcCmdPub.publish(_dcCmdMsg);*/  
   } else {
     sendACKIfNeeded(rmb.getHeader(), rmb.getTime(), -1, 1, "Failed to process RMB message");
   }
